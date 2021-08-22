@@ -15,6 +15,12 @@ func NewNgamux() *Ngamux {
 		router: newRouter(),
 	}
 }
+
+func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	route := mux.router.GetRoute(r.Method, r.URL.Path)
+	route.Handler(w, r)
+}
+
 func (mux *Ngamux) Get(path string, handler http.HandlerFunc) {
 	mux.router.AddRoute(http.MethodGet, Route{
 		Path:    path,

@@ -36,3 +36,8 @@ func newRouter() *Router {
 func (r *Router) AddRoute(method string, route Route) {
 	r.routes[method].Put(route.Path, route)
 }
+
+func (r *Router) GetRoute(method string, path string) Route {
+	route := r.routes[method].Get(path).(Route)
+	return route
+}
