@@ -1,6 +1,7 @@
 package ngamux
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ngamux/gotrie"
@@ -38,6 +39,16 @@ func (r *Router) AddRoute(method string, route Route) {
 }
 
 func (r *Router) GetRoute(method string, path string) Route {
-	route := r.routes[method].Get(path).(Route)
-	return route
+	route := r.routes[method].Get(path)
+	if route == nil {
+		return Route{
+			Handler: func(rw http.ResponseWriter, r *http.Request) {
+				rw.WriteHeader(http.StatusNotFound)
+				fmt.Fprintln(rw, "404 page not found")
+			},
+		}
+	}
+
+	routeFound := r.routes[method].Get(path).(Route)
+	return routeFound
 }
