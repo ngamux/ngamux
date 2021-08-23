@@ -3,8 +3,8 @@ Simple HTTP router for Go
 
 ---
 
-[Installation](./installation)
-[Examples](./examples)
+* [Installation](#installation)
+* [Examples](#examples)
 
 ---
 
