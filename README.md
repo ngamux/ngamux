@@ -10,12 +10,12 @@ Simple HTTP router for Go
 
 # Installation
 Run this command with correctly configured Go toolchain.
-```
+```bash
 go get github.com/ngamux/ngamux
 ```
 
 # Examples
-```
+```go
 package main
 
 import(
