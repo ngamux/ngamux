@@ -5,6 +5,7 @@ Simple HTTP router for Go
 
 * [Installation](#installation)
 * [Examples](#examples)
+* [Todo](#todo)
 
 ---
 
@@ -34,3 +35,8 @@ func main() {
   http.ListenAndServe(":8080", mux)
 }
 ```
+
+# Todo
+- Multiple handler (middleware for each route)
+- Route params (in URL parameters)
+- Route group
