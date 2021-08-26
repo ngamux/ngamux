@@ -54,6 +54,8 @@ func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (mux *Ngamux) Get(path string, handler ...http.HandlerFunc) {
 	if mux.parent != nil {
 		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+		middlewares := append(mux.parent.Handlers, handler...)
+		handler = middlewares
 	}
 
 	mux.router.AddRoute(http.MethodGet, Route{
@@ -65,6 +67,8 @@ func (mux *Ngamux) Get(path string, handler ...http.HandlerFunc) {
 func (mux *Ngamux) Post(path string, handler ...http.HandlerFunc) {
 	if mux.parent != nil {
 		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+		middlewares := append(mux.parent.Handlers, handler...)
+		handler = middlewares
 	}
 
 	mux.router.AddRoute(http.MethodPost, Route{
@@ -76,6 +80,8 @@ func (mux *Ngamux) Post(path string, handler ...http.HandlerFunc) {
 func (mux *Ngamux) Patch(path string, handler ...http.HandlerFunc) {
 	if mux.parent != nil {
 		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+		middlewares := append(mux.parent.Handlers, handler...)
+		handler = middlewares
 	}
 
 	mux.router.AddRoute(http.MethodPatch, Route{
@@ -87,6 +93,8 @@ func (mux *Ngamux) Patch(path string, handler ...http.HandlerFunc) {
 func (mux *Ngamux) Put(path string, handler ...http.HandlerFunc) {
 	if mux.parent != nil {
 		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+		middlewares := append(mux.parent.Handlers, handler...)
+		handler = middlewares
 	}
 
 	mux.router.AddRoute(http.MethodPut, Route{
@@ -98,6 +106,8 @@ func (mux *Ngamux) Put(path string, handler ...http.HandlerFunc) {
 func (mux *Ngamux) Delete(path string, handler ...http.HandlerFunc) {
 	if mux.parent != nil {
 		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+		middlewares := append(mux.parent.Handlers, handler...)
+		handler = middlewares
 	}
 
 	mux.router.AddRoute(http.MethodDelete, Route{
