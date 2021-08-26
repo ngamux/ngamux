@@ -6,7 +6,9 @@ import (
 )
 
 type Ngamux struct {
+	config Config
 	router *Router
+	parent *Route
 }
 
 type Config struct {
@@ -28,8 +30,18 @@ func NewNgamux(config ...Config) *Ngamux {
 		}
 	}
 	return &Ngamux{
+		config: ngamuxConfig,
 		router: newRouter(ngamuxConfig),
 	}
+}
+
+func (mux *Ngamux) Group(path string, middlewares ...http.HandlerFunc) *Ngamux {
+	ngamux := NewNgamux(mux.config)
+	ngamux.parent = &Route{
+		Path:     path,
+		Handlers: middlewares,
+	}
+	return ngamux
 }
 
 func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +52,10 @@ func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (mux *Ngamux) Get(path string, handler ...http.HandlerFunc) {
+	if mux.parent != nil {
+		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+	}
+
 	mux.router.AddRoute(http.MethodGet, Route{
 		Path:     path,
 		Handlers: handler,
@@ -47,6 +63,10 @@ func (mux *Ngamux) Get(path string, handler ...http.HandlerFunc) {
 }
 
 func (mux *Ngamux) Post(path string, handler ...http.HandlerFunc) {
+	if mux.parent != nil {
+		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+	}
+
 	mux.router.AddRoute(http.MethodPost, Route{
 		Path:     path,
 		Handlers: handler,
@@ -54,6 +74,10 @@ func (mux *Ngamux) Post(path string, handler ...http.HandlerFunc) {
 }
 
 func (mux *Ngamux) Patch(path string, handler ...http.HandlerFunc) {
+	if mux.parent != nil {
+		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+	}
+
 	mux.router.AddRoute(http.MethodPatch, Route{
 		Path:     path,
 		Handlers: handler,
@@ -61,6 +85,10 @@ func (mux *Ngamux) Patch(path string, handler ...http.HandlerFunc) {
 }
 
 func (mux *Ngamux) Put(path string, handler ...http.HandlerFunc) {
+	if mux.parent != nil {
+		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+	}
+
 	mux.router.AddRoute(http.MethodPut, Route{
 		Path:     path,
 		Handlers: handler,
@@ -68,6 +96,10 @@ func (mux *Ngamux) Put(path string, handler ...http.HandlerFunc) {
 }
 
 func (mux *Ngamux) Delete(path string, handler ...http.HandlerFunc) {
+	if mux.parent != nil {
+		path = fmt.Sprintf("%s%s", mux.parent.Path, path)
+	}
+
 	mux.router.AddRoute(http.MethodDelete, Route{
 		Path:     path,
 		Handlers: handler,
