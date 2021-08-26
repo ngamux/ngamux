@@ -37,6 +37,6 @@ func main() {
 ```
 
 # Todo
-- Multiple handler (middleware for each route)
-- Route params (in URL parameters)
-- Route group
+[x] Multiple handler (middleware for each route)
+[ ] Route params (in URL parameters)
+[ ] Route group
