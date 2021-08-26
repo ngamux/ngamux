@@ -12,8 +12,8 @@ type Router struct {
 }
 
 type Route struct {
-	Path    string
-	Handler http.HandlerFunc
+	Path     string
+	Handlers []http.HandlerFunc
 }
 
 func newRouter(config Config) *Router {
@@ -43,7 +43,7 @@ func (r *Router) GetRoute(method string, path string) Route {
 	route := r.routes[method].Get(path)
 	if route == nil {
 		return Route{
-			Handler: r.config.NotFoundHandler,
+			Handlers: []http.HandlerFunc{r.config.NotFoundHandler},
 		}
 	}
 

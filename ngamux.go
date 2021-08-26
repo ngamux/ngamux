@@ -34,40 +34,42 @@ func NewNgamux(config ...Config) *Ngamux {
 
 func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	route := mux.router.GetRoute(r.Method, r.URL.Path)
-	route.Handler(w, r)
+	for _, handler := range route.Handlers {
+		handler(w, r)
+	}
 }
 
-func (mux *Ngamux) Get(path string, handler http.HandlerFunc) {
+func (mux *Ngamux) Get(path string, handler ...http.HandlerFunc) {
 	mux.router.AddRoute(http.MethodGet, Route{
-		Path:    path,
-		Handler: handler,
+		Path:     path,
+		Handlers: handler,
 	})
 }
 
-func (mux *Ngamux) Post(path string, handler http.HandlerFunc) {
+func (mux *Ngamux) Post(path string, handler ...http.HandlerFunc) {
 	mux.router.AddRoute(http.MethodPost, Route{
-		Path:    path,
-		Handler: handler,
+		Path:     path,
+		Handlers: handler,
 	})
 }
 
-func (mux *Ngamux) Patch(path string, handler http.HandlerFunc) {
+func (mux *Ngamux) Patch(path string, handler ...http.HandlerFunc) {
 	mux.router.AddRoute(http.MethodPatch, Route{
-		Path:    path,
-		Handler: handler,
+		Path:     path,
+		Handlers: handler,
 	})
 }
 
-func (mux *Ngamux) Put(path string, handler http.HandlerFunc) {
+func (mux *Ngamux) Put(path string, handler ...http.HandlerFunc) {
 	mux.router.AddRoute(http.MethodPut, Route{
-		Path:    path,
-		Handler: handler,
+		Path:     path,
+		Handlers: handler,
 	})
 }
 
-func (mux *Ngamux) Delete(path string, handler http.HandlerFunc) {
+func (mux *Ngamux) Delete(path string, handler ...http.HandlerFunc) {
 	mux.router.AddRoute(http.MethodDelete, Route{
-		Path:    path,
-		Handler: handler,
+		Path:     path,
+		Handlers: handler,
 	})
 }
