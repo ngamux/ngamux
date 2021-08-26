@@ -1,7 +1,6 @@
 package ngamux
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/ngamux/gotrie"
@@ -9,6 +8,7 @@ import (
 
 type Router struct {
 	routes map[string]*gotrie.Trie
+	config Config
 }
 
 type Route struct {
@@ -16,7 +16,7 @@ type Route struct {
 	Handler http.HandlerFunc
 }
 
-func newRouter() *Router {
+func newRouter(config Config) *Router {
 	routesMap := map[string]*gotrie.Trie{
 		http.MethodGet:     gotrie.NewTrie(gotrie.Config{Separator: "/"}),
 		http.MethodPost:    gotrie.NewTrie(gotrie.Config{Separator: "/"}),
@@ -31,6 +31,7 @@ func newRouter() *Router {
 
 	return &Router{
 		routes: routesMap,
+		config: config,
 	}
 }
 
@@ -42,10 +43,7 @@ func (r *Router) GetRoute(method string, path string) Route {
 	route := r.routes[method].Get(path)
 	if route == nil {
 		return Route{
-			Handler: func(rw http.ResponseWriter, r *http.Request) {
-				rw.WriteHeader(http.StatusNotFound)
-				fmt.Fprintln(rw, "404 page not found")
-			},
+			Handler: r.config.NotFoundHandler,
 		}
 	}
 

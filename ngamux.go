@@ -1,6 +1,7 @@
 package ngamux
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -8,11 +9,26 @@ type Ngamux struct {
 	router *Router
 }
 
+type Config struct {
+	NotFoundHandler http.HandlerFunc
+}
+
 var _ http.Handler = &Ngamux{}
 
-func NewNgamux() *Ngamux {
+func NewNgamux(config ...Config) *Ngamux {
+	ngamuxConfig := Config{}
+	if len(config) > 0 {
+		ngamuxConfig = config[0]
+	}
+
+	if ngamuxConfig.NotFoundHandler == nil {
+		ngamuxConfig.NotFoundHandler = func(rw http.ResponseWriter, r *http.Request) {
+			rw.WriteHeader(http.StatusNotFound)
+			fmt.Fprintln(rw, "404 page not found")
+		}
+	}
 	return &Ngamux{
-		router: newRouter(),
+		router: newRouter(ngamuxConfig),
 	}
 }
 
