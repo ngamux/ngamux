@@ -34,6 +34,13 @@ func NewNgamux(config ...Config) *Ngamux {
 	}
 }
 
+func buildRoute(url string, handler ...http.HandlerFunc) Route {
+	return Route{
+		Path:     url,
+		Handlers: handler,
+	}
+}
+
 func (mux *Ngamux) Group(path string, middlewares ...http.HandlerFunc) *group {
 	group := &group{
 		parent:      mux,
@@ -51,36 +58,21 @@ func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (mux *Ngamux) Get(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodGet, Route{
-		Path:     path,
-		Handlers: handler,
-	})
+	mux.router.AddRoute(http.MethodGet, buildRoute(path, handler...))
 }
 
 func (mux *Ngamux) Post(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodPost, Route{
-		Path:     path,
-		Handlers: handler,
-	})
+	mux.router.AddRoute(http.MethodPost, buildRoute(path, handler...))
 }
 
 func (mux *Ngamux) Patch(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodPatch, Route{
-		Path:     path,
-		Handlers: handler,
-	})
+	mux.router.AddRoute(http.MethodPatch, buildRoute(path, handler...))
 }
 
 func (mux *Ngamux) Put(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodPut, Route{
-		Path:     path,
-		Handlers: handler,
-	})
+	mux.router.AddRoute(http.MethodPut, buildRoute(path, handler...))
 }
 
 func (mux *Ngamux) Delete(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodDelete, Route{
-		Path:     path,
-		Handlers: handler,
-	})
+	mux.router.AddRoute(http.MethodDelete, buildRoute(path, handler...))
 }
