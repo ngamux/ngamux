@@ -2,12 +2,10 @@ package ngamux
 
 import (
 	"net/http"
-
-	"github.com/ngamux/gotrie"
 )
 
 type Router struct {
-	routes map[string]*gotrie.Trie
+	routes map[string]map[string]Route
 	config Config
 }
 
@@ -17,16 +15,16 @@ type Route struct {
 }
 
 func newRouter(config Config) *Router {
-	routesMap := map[string]*gotrie.Trie{
-		http.MethodGet:     gotrie.NewTrie(gotrie.Config{Separator: "/"}),
-		http.MethodPost:    gotrie.NewTrie(gotrie.Config{Separator: "/"}),
-		http.MethodPatch:   gotrie.NewTrie(gotrie.Config{Separator: "/"}),
-		http.MethodPut:     gotrie.NewTrie(gotrie.Config{Separator: "/"}),
-		http.MethodDelete:  gotrie.NewTrie(gotrie.Config{Separator: "/"}),
-		http.MethodOptions: gotrie.NewTrie(gotrie.Config{Separator: "/"}),
-		http.MethodConnect: gotrie.NewTrie(gotrie.Config{Separator: "/"}),
-		http.MethodHead:    gotrie.NewTrie(gotrie.Config{Separator: "/"}),
-		http.MethodTrace:   gotrie.NewTrie(gotrie.Config{Separator: "/"}),
+	routesMap := map[string]map[string]Route{
+		http.MethodGet:     map[string]Route{},
+		http.MethodPost:    map[string]Route{},
+		http.MethodPatch:   map[string]Route{},
+		http.MethodPut:     map[string]Route{},
+		http.MethodDelete:  map[string]Route{},
+		http.MethodOptions: map[string]Route{},
+		http.MethodConnect: map[string]Route{},
+		http.MethodHead:    map[string]Route{},
+		http.MethodTrace:   map[string]Route{},
 	}
 
 	return &Router{
@@ -36,17 +34,16 @@ func newRouter(config Config) *Router {
 }
 
 func (r *Router) AddRoute(method string, route Route) {
-	r.routes[method].Put(route.Path, route)
+	r.routes[method][route.Path] = route
 }
 
 func (r *Router) GetRoute(method string, path string) Route {
-	route := r.routes[method].Get(path)
-	if route == nil {
+	route, ok := r.routes[method][path]
+	if !ok {
 		return Route{
 			Handlers: []http.HandlerFunc{r.config.NotFoundHandler},
 		}
 	}
 
-	routeFound := r.routes[method].Get(path).(Route)
-	return routeFound
+	return route
 }
