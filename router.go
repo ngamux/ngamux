@@ -16,15 +16,15 @@ type Route struct {
 
 func newRouter(config Config) *Router {
 	routesMap := map[string]map[string]Route{
-		http.MethodGet:     map[string]Route{},
-		http.MethodPost:    map[string]Route{},
-		http.MethodPatch:   map[string]Route{},
-		http.MethodPut:     map[string]Route{},
-		http.MethodDelete:  map[string]Route{},
-		http.MethodOptions: map[string]Route{},
-		http.MethodConnect: map[string]Route{},
-		http.MethodHead:    map[string]Route{},
-		http.MethodTrace:   map[string]Route{},
+		http.MethodGet:     {},
+		http.MethodPost:    {},
+		http.MethodPatch:   {},
+		http.MethodPut:     {},
+		http.MethodDelete:  {},
+		http.MethodOptions: {},
+		http.MethodConnect: {},
+		http.MethodHead:    {},
+		http.MethodTrace:   {},
 	}
 
 	return &Router{
