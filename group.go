@@ -11,37 +11,27 @@ type group struct {
 	middlewares []http.HandlerFunc
 }
 
-func (mux group) buildRoute(url string, handler ...http.HandlerFunc) Route {
-	url = path.Join(mux.path, url)
-	middlewares := append(mux.middlewares, handler...)
-	handler = middlewares
-	return Route{
-		Path:     url,
-		Handlers: handler,
-	}
-}
-
 func (mux *group) Get(url string, handler ...http.HandlerFunc) {
-	route := mux.buildRoute(url, handler...)
-	mux.parent.router.AddRoute(http.MethodGet, route)
+	url = path.Join(mux.path, url)
+	mux.parent.Get(url, handler...)
 }
 
 func (mux *group) Post(url string, handler ...http.HandlerFunc) {
-	route := mux.buildRoute(url, handler...)
-	mux.parent.router.AddRoute(http.MethodPost, route)
+	url = path.Join(mux.path, url)
+	mux.parent.Post(url, handler...)
 }
 
 func (mux *group) Patch(url string, handler ...http.HandlerFunc) {
-	route := mux.buildRoute(url, handler...)
-	mux.parent.router.AddRoute(http.MethodPatch, route)
+	url = path.Join(mux.path, url)
+	mux.parent.Patch(url, handler...)
 }
 
 func (mux *group) Put(url string, handler ...http.HandlerFunc) {
-	route := mux.buildRoute(url, handler...)
-	mux.parent.router.AddRoute(http.MethodPut, route)
+	url = path.Join(mux.path, url)
+	mux.parent.Put(url, handler...)
 }
 
 func (mux *group) Delete(url string, handler ...http.HandlerFunc) {
-	route := mux.buildRoute(url, handler...)
-	mux.parent.router.AddRoute(http.MethodDelete, route)
+	url = path.Join(mux.path, url)
+	mux.parent.Delete(url, handler...)
 }
