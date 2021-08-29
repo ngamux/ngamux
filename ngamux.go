@@ -24,6 +24,18 @@ type Config struct {
 
 var _ http.Handler = &Ngamux{}
 
+func handlerNotFound(rw http.ResponseWriter, r *http.Request) {
+	rw.WriteHeader(http.StatusNotFound)
+	fmt.Fprintln(rw, "404 page not found")
+}
+
+func buildRoute(url string, handler ...http.HandlerFunc) Route {
+	return Route{
+		Path:     url,
+		Handlers: handler,
+	}
+}
+
 func NewNgamux(config ...Config) *Ngamux {
 	ngamuxConfig := Config{
 		RemoveTrailingSlash: true,
@@ -33,22 +45,12 @@ func NewNgamux(config ...Config) *Ngamux {
 	}
 
 	if ngamuxConfig.NotFoundHandler == nil {
-		ngamuxConfig.NotFoundHandler = func(rw http.ResponseWriter, r *http.Request) {
-			rw.WriteHeader(http.StatusNotFound)
-			fmt.Fprintln(rw, "404 page not found")
-		}
+		ngamuxConfig.NotFoundHandler = handlerNotFound
 	}
 
 	return &Ngamux{
 		config: ngamuxConfig,
 		router: newRouter(ngamuxConfig),
-	}
-}
-
-func buildRoute(url string, handler ...http.HandlerFunc) Route {
-	return Route{
-		Path:     url,
-		Handlers: handler,
 	}
 }
 
@@ -63,7 +65,7 @@ func (mux *Ngamux) Group(path string, middlewares ...http.HandlerFunc) *group {
 
 func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
-	if mux.config.RemoveTrailingSlash && url[len(url)-1] == '/' {
+	if mux.config.RemoveTrailingSlash && len(url) > 1 && url[len(url)-1] == '/' {
 		url = url[:len(url)-1]
 	}
 	route := mux.router.GetRoute(r.Method, url)
