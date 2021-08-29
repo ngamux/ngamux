@@ -1,8 +1,15 @@
 package ngamux
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+)
+
+type KeyContext int
+
+const (
+	KeyContextParams KeyContext = 1 << iota
 )
 
 type Ngamux struct {
@@ -60,6 +67,12 @@ func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		url = url[:len(url)-1]
 	}
 	route := mux.router.GetRoute(r.Method, url)
+
+	if len(route.Params) > 0 {
+		ctx := context.WithValue(r.Context(), KeyContextParams, route.Params)
+		r = r.WithContext(ctx)
+	}
+
 	for _, handler := range route.Handlers {
 		handler(w, r)
 	}
