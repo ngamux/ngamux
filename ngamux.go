@@ -11,13 +11,16 @@ type Ngamux struct {
 }
 
 type Config struct {
-	NotFoundHandler http.HandlerFunc
+	RemoveTrailingSlash bool
+	NotFoundHandler     http.HandlerFunc
 }
 
 var _ http.Handler = &Ngamux{}
 
 func NewNgamux(config ...Config) *Ngamux {
-	ngamuxConfig := Config{}
+	ngamuxConfig := Config{
+		RemoveTrailingSlash: true,
+	}
 	if len(config) > 0 {
 		ngamuxConfig = config[0]
 	}
@@ -28,6 +31,7 @@ func NewNgamux(config ...Config) *Ngamux {
 			fmt.Fprintln(rw, "404 page not found")
 		}
 	}
+
 	return &Ngamux{
 		config: ngamuxConfig,
 		router: newRouter(ngamuxConfig),
@@ -51,7 +55,11 @@ func (mux *Ngamux) Group(path string, middlewares ...http.HandlerFunc) *group {
 }
 
 func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	route := mux.router.GetRoute(r.Method, r.URL.Path)
+	url := r.URL.Path
+	if mux.config.RemoveTrailingSlash && url[len(url)-1] == '/' {
+		url = url[:len(url)-1]
+	}
+	route := mux.router.GetRoute(r.Method, url)
 	for _, handler := range route.Handlers {
 		handler(w, r)
 	}
