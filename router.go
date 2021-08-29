@@ -56,27 +56,31 @@ func (r *Router) GetRoute(method string, path string) Route {
 	foundRoute := Route{
 		Handlers: []http.HandlerFunc{r.config.NotFoundHandler},
 	}
-	for url, route := range r.routes[method] {
-		urlMatcher, err := regexp.Compile("^" + url + "$")
-		if err != nil {
-			continue
-		}
 
-		if urlMatcher.MatchString(path) {
-			foundParams := urlMatcher.FindAllStringSubmatch(path, -1)
-			params := make([][]string, len(route.Params))
-			copy(params, route.Params)
-			for i := range params {
-				params[i] = append(params[i], foundParams[0][i+1])
+	foundRoute, ok := r.routes[method][path]
+	if !ok {
+		for url, route := range r.routes[method] {
+			urlMatcher, err := regexp.Compile("^" + url + "$")
+			if err != nil {
+				continue
 			}
-			route.Params = params
-			foundRoute = route
-			break
-		}
 
-		if url == path {
-			foundRoute = route
-			break
+			if urlMatcher.MatchString(path) {
+				foundParams := urlMatcher.FindAllStringSubmatch(path, -1)
+				params := make([][]string, len(route.Params))
+				copy(params, route.Params)
+				for i := range params {
+					params[i] = append(params[i], foundParams[0][i+1])
+				}
+				route.Params = params
+				foundRoute = route
+				break
+			}
+
+			if url == path {
+				foundRoute = route
+				break
+			}
 		}
 	}
 
