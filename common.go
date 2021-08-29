@@ -26,3 +26,14 @@ func JSONWithStatus(rw http.ResponseWriter, status int, data interface{}) error 
 
 	return nil
 }
+
+func GetParam(r *http.Request, key string) string {
+	params := r.Context().Value(KeyContextParams).([][]string)
+	for _, param := range params {
+		if param[0] == key {
+			return param[1]
+		}
+	}
+
+	return ""
+}
