@@ -39,4 +39,4 @@ func main() {
 # Todo
 - [x] Multiple handler (middleware for each route)
 - [x] Route group
-- [ ] Route params (in URL parameters)
+- [x] Route params (in URL parameters)
