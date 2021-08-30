@@ -1,13 +1,16 @@
 package ngamux
 
 import (
+	"log"
 	"net/http"
 	"regexp"
 )
 
 type Router struct {
-	routes map[string]map[string]Route
-	config Config
+	routes            map[string]map[string]Route
+	routesParam       map[string]map[string]Route
+	config            Config
+	regexpParamFinded *regexp.Regexp
 }
 
 type Route struct {
@@ -29,27 +32,41 @@ func newRouter(config Config) *Router {
 		http.MethodTrace:   {},
 	}
 
+	paramsFinder, err := regexp.Compile("(:[a-zA-Z][0-9a-zA-Z]+)")
+	if err != nil {
+		log.Fatal(err.Error())
+		return nil
+	}
+
 	return &Router{
-		routes: routesMap,
-		config: config,
+		routes:            routesMap,
+		routesParam:       routesMap,
+		config:            config,
+		regexpParamFinded: paramsFinder,
 	}
 }
 
 func (r *Router) AddRoute(method string, route Route) {
-	paramsFinder, err := regexp.Compile("(:[a-zA-Z][0-9a-zA-Z]+)")
-	if err != nil {
-		r.routes[method][route.Path] = route
-	}
+	var (
+		pathWithParams string
+		subMatchs      = r.regexpParamFinded.FindAllStringSubmatch(route.Path, -1)
+	)
 
 	route.Params = [][]string{}
-	for _, val := range paramsFinder.FindAllStringSubmatch(route.Path, -1) {
+
+	// check if route not have url param
+	if len(subMatchs) == 0 {
+		r.routes[method][route.Path] = route
+		return
+	}
+
+	for _, val := range subMatchs {
 		route.Params = append(route.Params, []string{val[0][1:]})
 	}
 
-	pathWithParams := paramsFinder.ReplaceAllString(route.Path, "([0-9a-zA-Z]+)")
+	pathWithParams = r.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z]+)")
 	route.Path = pathWithParams
-
-	r.routes[method][route.Path] = route
+	r.routesParam[method][route.Path] = route
 }
 
 func (r *Router) GetRoute(method string, path string) Route {
@@ -59,7 +76,7 @@ func (r *Router) GetRoute(method string, path string) Route {
 
 	foundRoute, ok := r.routes[method][path]
 	if !ok {
-		for url, route := range r.routes[method] {
+		for url, route := range r.routesParam[method] {
 			urlMatcher, err := regexp.Compile("^" + url + "$")
 			if err != nil {
 				continue
