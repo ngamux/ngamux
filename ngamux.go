@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/ngamux/ngamux/middleware"
 )
 
 type KeyContext int
@@ -13,8 +15,10 @@ const (
 )
 
 type Ngamux struct {
-	config Config
-	router *Router
+	config   Config
+	router   *Router
+	recovery *middleware.Recovery
+	cors     *middleware.Cors
 }
 
 type Config struct {
@@ -76,7 +80,40 @@ func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, handler := range route.Handlers {
+		if mux.recovery != nil {
+			defer mux.recovery.RecoverFunc()
+		}
+		if mux.cors != nil {
+			mux.useCors(&w, r)
+		}
 		handler(w, r)
+	}
+}
+
+func (mux *Ngamux) useCors(w *http.ResponseWriter, r *http.Request) {
+
+	(*w).Header().Set("Access-Control-Allow-Origin", mux.cors.Origin)
+	(*w).Header().Set("Access-Control-Allow-Methods", mux.cors.Method)
+	(*w).Header().Set("Access-Control-Allow-Headers", mux.cors.Header)
+	(*w).Header().Set("Access-Control-Expose-Headers", mux.cors.ExposeHeader)
+
+}
+
+func (mux *Ngamux) Use(middlewares ...interface{}) {
+
+	for _, midd := range middlewares {
+
+		recovery, ok := midd.(*middleware.Recovery)
+		if ok {
+			mux.recovery = recovery
+			continue
+		}
+
+		cors, ok := midd.(*middleware.Cors)
+		if ok {
+			mux.cors = cors
+			continue
+		}
 	}
 }
 

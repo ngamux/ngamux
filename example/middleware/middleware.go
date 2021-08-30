@@ -1,22 +1,3 @@
-# ngamux
-Simple HTTP router for Go
-
----
-
-* [Installation](#installation)
-* [Examples](#examples)
-* [Todo](#todo)
-
----
-
-# Installation
-Run this command with correctly configured Go toolchain.
-```bash
-go get github.com/ngamux/ngamux
-```
-
-# Examples
-```go
 package main
 
 import (
@@ -56,19 +37,12 @@ func main() {
 	mux.Use(
 		middleware.Recover(),
 		middleware.EnableCors(middleware.CorsOptions{
-			AllowMethods: []string{http.MethodPost, http.MethodPut, http.MethodDelete},
-			AllowHeaders: []string{"*"},
-			AllowOrigins: []string{"*"},
+			AllowMethods:      []string{http.MethodPost, http.MethodPut, http.MethodDelete},
+			AllowHeaders:      []string{"*"},
+			AllowOrigins:      []string{"*"},
+			AllowExposeHeader: []string{"*"},
 		}),
 	)
 
 	http.ListenAndServe(":8080", mux)
 }
-```
-
-# Todo
-- [x] Multiple handler (middleware for each route)
-- [x] Route group
-- [x] Route params (in URL parameters)
-- [x] Enable recovery
-- [x] Enable cors
