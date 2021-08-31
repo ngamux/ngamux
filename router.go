@@ -14,9 +14,10 @@ type Router struct {
 }
 
 type Route struct {
-	Path     string
-	Handlers []http.HandlerFunc
-	Params   [][]string
+	Path       string
+	Handlers   []http.HandlerFunc
+	Params     [][]string
+	UrlMathcer *regexp.Regexp
 }
 
 func newRouter(config Config) *Router {
@@ -61,6 +62,7 @@ func newRouter(config Config) *Router {
 
 func (r *Router) AddRoute(method string, route Route) {
 	var (
+		err            error
 		pathWithParams string
 		subMatchs      = r.regexpParamFinded.FindAllStringSubmatch(route.Path, -1)
 	)
@@ -79,6 +81,13 @@ func (r *Router) AddRoute(method string, route Route) {
 
 	pathWithParams = r.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z]+)")
 	route.Path = pathWithParams
+
+	route.UrlMathcer, err = regexp.Compile("^" + pathWithParams + "$")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
 	r.routesParam[method][route.Path] = route
 }
 
@@ -90,13 +99,9 @@ func (r *Router) GetRoute(method string, path string) Route {
 	foundRoute, ok := r.routes[method][path]
 	if !ok {
 		for url, route := range r.routesParam[method] {
-			urlMatcher, err := regexp.Compile("^" + url + "$")
-			if err != nil {
-				continue
-			}
 
-			if urlMatcher.MatchString(path) {
-				foundParams := urlMatcher.FindAllStringSubmatch(path, -1)
+			if route.UrlMathcer.MatchString(path) {
+				foundParams := route.UrlMathcer.FindAllStringSubmatch(path, -1)
 				params := make([][]string, len(route.Params))
 				copy(params, route.Params)
 				for i := range params {
