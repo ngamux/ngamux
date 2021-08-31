@@ -1,7 +1,6 @@
 package ngamux
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -96,8 +95,6 @@ func (r *Router) GetRoute(method string, path string) Route {
 	foundRoute := Route{
 		Handlers: []http.HandlerFunc{r.config.NotFoundHandler},
 	}
-
-	fmt.Println("testing123")
 
 	foundRoute, ok := r.routes[method][path]
 	if !ok {
