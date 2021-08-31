@@ -38,12 +38,25 @@ func newRouter(config Config) *Router {
 		return nil
 	}
 
-	return &Router{
+	router := &Router{
 		routes:            routesMap,
-		routesParam:       routesMap,
+		routesParam:       make(map[string]map[string]Route),
 		config:            config,
 		regexpParamFinded: paramsFinder,
 	}
+
+	// copy routesmap to routes param
+	for key, val := range router.routes {
+
+		var row = make(map[string]Route)
+		for key2, route := range val {
+			row[key2] = route
+		}
+
+		router.routesParam[key] = row
+	}
+
+	return router
 }
 
 func (r *Router) AddRoute(method string, route Route) {
