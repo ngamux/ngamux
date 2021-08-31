@@ -33,5 +33,20 @@ func main() {
 		),
 	)
 
+	users := mux.Group("/users")
+	users.Get("/",
+		MiddlewareHello(
+			MiddlewareHello(
+				MiddlewareHello(
+					MiddlewareHello(
+						func(rw http.ResponseWriter, r *http.Request) {
+							fmt.Fprintln(rw, "hello from users handler")
+						},
+					),
+				),
+			),
+		),
+	)
+
 	http.ListenAndServe(":8080", mux)
 }
