@@ -37,3 +37,11 @@ func GetParam(r *http.Request, key string) string {
 
 	return ""
 }
+
+func GetBody(r *http.Request, store interface{}) error {
+	if err := json.NewDecoder(r.Body).Decode(&store); err != nil {
+		return err
+	}
+
+	return nil
+}
