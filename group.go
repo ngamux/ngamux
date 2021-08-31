@@ -11,27 +11,27 @@ type group struct {
 	middlewares []http.HandlerFunc
 }
 
-func (mux *group) Get(url string, handler ...http.HandlerFunc) {
+func (mux *group) Get(url string, handler http.HandlerFunc) {
 	url = path.Join(mux.path, url)
-	mux.parent.Get(url, handler...)
+	mux.parent.Get(url, handler)
 }
 
-func (mux *group) Post(url string, handler ...http.HandlerFunc) {
+func (mux *group) Post(url string, handler http.HandlerFunc) {
 	url = path.Join(mux.path, url)
-	mux.parent.Post(url, handler...)
+	mux.parent.Post(url, handler)
 }
 
-func (mux *group) Patch(url string, handler ...http.HandlerFunc) {
+func (mux *group) Patch(url string, handler http.HandlerFunc) {
 	url = path.Join(mux.path, url)
-	mux.parent.Patch(url, handler...)
+	mux.parent.Patch(url, handler)
 }
 
-func (mux *group) Put(url string, handler ...http.HandlerFunc) {
+func (mux *group) Put(url string, handler http.HandlerFunc) {
 	url = path.Join(mux.path, url)
-	mux.parent.Put(url, handler...)
+	mux.parent.Put(url, handler)
 }
 
-func (mux *group) Delete(url string, handler ...http.HandlerFunc) {
+func (mux *group) Delete(url string, handler http.HandlerFunc) {
 	url = path.Join(mux.path, url)
-	mux.parent.Delete(url, handler...)
+	mux.parent.Delete(url, handler)
 }

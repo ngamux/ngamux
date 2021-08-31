@@ -29,10 +29,10 @@ func handlerNotFound(rw http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(rw, "404 page not found")
 }
 
-func buildRoute(url string, handler ...http.HandlerFunc) Route {
+func buildRoute(url string, handler http.HandlerFunc) Route {
 	return Route{
-		Path:     url,
-		Handlers: handler,
+		Path:    url,
+		Handler: handler,
 	}
 }
 
@@ -63,7 +63,7 @@ func (mux *Ngamux) Group(path string, middlewares ...http.HandlerFunc) *group {
 	return group
 }
 
-func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
 	if mux.config.RemoveTrailingSlash && len(url) > 1 && url[len(url)-1] == '/' {
 		url = url[:len(url)-1]
@@ -75,27 +75,25 @@ func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r = r.WithContext(ctx)
 	}
 
-	for _, handler := range route.Handlers {
-		handler(w, r)
-	}
+	route.Handler(rw, r)
 }
 
-func (mux *Ngamux) Get(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodGet, buildRoute(path, handler...))
+func (mux *Ngamux) Get(path string, handler http.HandlerFunc) {
+	mux.router.AddRoute(http.MethodGet, buildRoute(path, handler))
 }
 
-func (mux *Ngamux) Post(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodPost, buildRoute(path, handler...))
+func (mux *Ngamux) Post(path string, handler http.HandlerFunc) {
+	mux.router.AddRoute(http.MethodPost, buildRoute(path, handler))
 }
 
-func (mux *Ngamux) Patch(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodPatch, buildRoute(path, handler...))
+func (mux *Ngamux) Patch(path string, handler http.HandlerFunc) {
+	mux.router.AddRoute(http.MethodPatch, buildRoute(path, handler))
 }
 
-func (mux *Ngamux) Put(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodPut, buildRoute(path, handler...))
+func (mux *Ngamux) Put(path string, handler http.HandlerFunc) {
+	mux.router.AddRoute(http.MethodPut, buildRoute(path, handler))
 }
 
-func (mux *Ngamux) Delete(path string, handler ...http.HandlerFunc) {
-	mux.router.AddRoute(http.MethodDelete, buildRoute(path, handler...))
+func (mux *Ngamux) Delete(path string, handler http.HandlerFunc) {
+	mux.router.AddRoute(http.MethodDelete, buildRoute(path, handler))
 }
