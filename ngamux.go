@@ -76,7 +76,6 @@ func (mux *Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, handler := range route.Handlers {
-		defer Recovery()
 		handler(w, r)
 	}
 }
