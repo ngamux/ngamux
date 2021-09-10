@@ -17,6 +17,7 @@ const (
 type Config struct {
 	RemoveTrailingSlash bool
 	NotFoundHandler     http.HandlerFunc
+	PanicHandler        func(w http.ResponseWriter, r *http.Request, p interface{})
 }
 
 type Ngamux struct {
@@ -40,6 +41,11 @@ func handlerNotFound(rw http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(rw, "404 page not found")
 }
 
+func DefaultPanicHandler(rw http.ResponseWriter, _ *http.Request, p interface{}) {
+	rw.WriteHeader(http.StatusInternalServerError)
+	fmt.Fprintf(rw, "panic: %v", p)
+}
+
 func buildRoute(url string, handler http.HandlerFunc) Route {
 	return Route{
 		Path:    url,
@@ -57,6 +63,10 @@ func makeConfig(configs ...Config) Config {
 
 	if config.NotFoundHandler == nil {
 		config.NotFoundHandler = handlerNotFound
+	}
+
+	if config.PanicHandler == nil {
+		config.PanicHandler = DefaultPanicHandler
 	}
 
 	return config
@@ -175,6 +185,12 @@ func (mux *Ngamux) Group(path string, middlewares ...http.HandlerFunc) *group {
 }
 
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if p := recover(); p != nil {
+			mux.config.PanicHandler(rw, r, p)
+		}
+	}()
+
 	url := r.URL.Path
 	if mux.config.RemoveTrailingSlash && len(url) > 1 && url[len(url)-1] == '/' {
 		url = url[:len(url)-1]
