@@ -135,10 +135,6 @@ func (r *Ngamux) addRoute(method string, route Route) {
 }
 
 func (r *Ngamux) getRoute(method string, path string) Route {
-	foundRoute := Route{
-		Handler: r.config.NotFoundHandler,
-	}
-
 	foundRoute, ok := r.routes[method][path]
 	if !ok {
 		for url, route := range r.routesParam[method] {
@@ -160,6 +156,10 @@ func (r *Ngamux) getRoute(method string, path string) Route {
 				break
 			}
 		}
+	}
+
+	if foundRoute.Handler == nil {
+		foundRoute.Handler = r.config.NotFoundHandler
 	}
 
 	return foundRoute
