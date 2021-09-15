@@ -19,34 +19,33 @@ func main() {
 		RemoveTrailingSlash: true,
 	})
 
-	mux.Get("/",
-		MiddlewareHello(
-			MiddlewareHello(
-				MiddlewareHello(
-					MiddlewareHello(
-						func(rw http.ResponseWriter, r *http.Request) {
-							fmt.Fprintln(rw, "hello from handler")
-						},
-					),
-				),
-			),
-		),
-	)
+	mux.Use(func(handlerFunc ngamux.HandlerFunc) ngamux.HandlerFunc {
+		return func(rw http.ResponseWriter, r *http.Request) error {
+			fmt.Println("hello from middleware")
+			return handlerFunc(rw, r)
+		}
+	})
 
-	users := mux.Group("/users")
-	users.Get("/",
-		MiddlewareHello(
-			MiddlewareHello(
-				MiddlewareHello(
-					MiddlewareHello(
-						func(rw http.ResponseWriter, r *http.Request) {
-							fmt.Fprintln(rw, "hello from users handler")
-						},
-					),
-				),
-			),
-		),
-	)
+	mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
+		fmt.Fprintln(rw, "hello from users handler")
+		fmt.Println("hello from handler")
+		return nil
+	})
+
+	//users := mux.Group("/users")
+	//users.Get("/",
+	//	MiddlewareHello(
+	//		MiddlewareHello(
+	//			MiddlewareHello(
+	//				MiddlewareHello(
+	//					func(rw http.ResponseWriter, r *http.Request) {
+	//						fmt.Fprintln(rw, "hello from users handler")
+	//					},
+	//				),
+	//			),
+	//		),
+	//	),
+	//)
 
 	http.ListenAndServe(":8080", mux)
 }
