@@ -14,9 +14,14 @@ const (
 	KeyContextParams KeyContext = 1 << iota
 )
 
+type (
+	MiddlewareFunc func(HandlerFunc) HandlerFunc
+	HandlerFunc    func(rw http.ResponseWriter, r *http.Request) error
+)
+
 type Config struct {
 	RemoveTrailingSlash bool
-	NotFoundHandler     http.HandlerFunc
+	NotFoundHandler     HandlerFunc
 }
 
 type Ngamux struct {
@@ -24,26 +29,30 @@ type Ngamux struct {
 	routesParam       map[string]map[string]Route
 	config            Config
 	regexpParamFinded *regexp.Regexp
+	middleware        []MiddlewareFunc
 }
 
 var _ http.Handler = &Ngamux{}
 
 type Route struct {
 	Path       string
-	Handler    http.HandlerFunc
+	Handler    HandlerFunc
 	Params     [][]string
 	UrlMathcer *regexp.Regexp
+	Middleware []MiddlewareFunc
 }
 
-func handlerNotFound(rw http.ResponseWriter, r *http.Request) {
+var handlerNotFound = func(rw http.ResponseWriter, r *http.Request) error {
 	rw.WriteHeader(http.StatusNotFound)
 	fmt.Fprintln(rw, "404 page not found")
+	return nil
 }
 
-func buildRoute(url string, handler http.HandlerFunc) Route {
+func buildRoute(url string, handler HandlerFunc, middleware ...MiddlewareFunc) Route {
 	return Route{
-		Path:    url,
-		Handler: handler,
+		Path:       url,
+		Handler:    handler,
+		Middleware: middleware,
 	}
 }
 
@@ -54,7 +63,6 @@ func makeConfig(configs ...Config) Config {
 	if len(configs) > 0 {
 		config = configs[0]
 	}
-
 	if config.NotFoundHandler == nil {
 		config.NotFoundHandler = handlerNotFound
 	}
@@ -176,35 +184,51 @@ func (mux *Ngamux) Group(path string, middlewares ...http.HandlerFunc) *group {
 
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
+	h := handlerNotFound
 	if mux.config.RemoveTrailingSlash && len(url) > 1 && url[len(url)-1] == '/' {
 		url = url[:len(url)-1]
 	}
 	route := mux.getRoute(r.Method, url)
-
 	if len(route.Params) > 0 {
 		ctx := context.WithValue(r.Context(), KeyContextParams, route.Params)
 		r = r.WithContext(ctx)
 	}
 
-	route.Handler(rw, r)
+	h = func(rw http.ResponseWriter, r *http.Request) error {
+		h = applyMiddleware(route.Handler, mux.middleware...)
+		return h(rw, r)
+	}
+
+	h(rw, r)
 }
 
-func (mux *Ngamux) Get(path string, handler http.HandlerFunc) {
-	mux.addRoute(http.MethodGet, buildRoute(path, handler))
+func applyMiddleware(h HandlerFunc, middleware ...MiddlewareFunc) HandlerFunc {
+	for i := len(middleware) - 1; i >= 0; i-- {
+		h = middleware[i](h)
+	}
+	return h
 }
 
-func (mux *Ngamux) Post(path string, handler http.HandlerFunc) {
+func (mux *Ngamux) Use(middleware ...MiddlewareFunc) {
+	mux.middleware = append(mux.middleware, middleware...)
+}
+
+func (mux *Ngamux) Get(path string, handler HandlerFunc, middleware ...MiddlewareFunc) {
+	mux.addRoute(http.MethodGet, buildRoute(path, handler, middleware...))
+}
+
+func (mux *Ngamux) Post(path string, handler HandlerFunc) {
 	mux.addRoute(http.MethodPost, buildRoute(path, handler))
 }
 
-func (mux *Ngamux) Patch(path string, handler http.HandlerFunc) {
+func (mux *Ngamux) Patch(path string, handler HandlerFunc) {
 	mux.addRoute(http.MethodPatch, buildRoute(path, handler))
 }
 
-func (mux *Ngamux) Put(path string, handler http.HandlerFunc) {
+func (mux *Ngamux) Put(path string, handler HandlerFunc) {
 	mux.addRoute(http.MethodPut, buildRoute(path, handler))
 }
 
-func (mux *Ngamux) Delete(path string, handler http.HandlerFunc) {
+func (mux *Ngamux) Delete(path string, handler HandlerFunc) {
 	mux.addRoute(http.MethodDelete, buildRoute(path, handler))
 }
