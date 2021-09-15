@@ -21,7 +21,7 @@ func main() {
 
 	mux.Use(func(next ngamux.HandlerFunc) ngamux.HandlerFunc {
 		return func(rw http.ResponseWriter, r *http.Request) error {
-			fmt.Println("hello from middleware")
+			fmt.Println("hello from middleware 1")
 			return next(rw, r)
 		}
 	})
@@ -31,21 +31,6 @@ func main() {
 		fmt.Println("hello from handler")
 		return nil
 	})
-
-	//users := mux.Group("/users")
-	//users.Get("/",
-	//	MiddlewareHello(
-	//		MiddlewareHello(
-	//			MiddlewareHello(
-	//				MiddlewareHello(
-	//					func(rw http.ResponseWriter, r *http.Request) {
-	//						fmt.Fprintln(rw, "hello from users handler")
-	//					},
-	//				),
-	//			),
-	//		),
-	//	),
-	//)
 
 	http.ListenAndServe(":8080", mux)
 }
