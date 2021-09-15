@@ -19,10 +19,10 @@ func main() {
 		RemoveTrailingSlash: true,
 	})
 
-	mux.Use(func(handlerFunc ngamux.HandlerFunc) ngamux.HandlerFunc {
+	mux.Use(func(next ngamux.HandlerFunc) ngamux.HandlerFunc {
 		return func(rw http.ResponseWriter, r *http.Request) error {
 			fmt.Println("hello from middleware")
-			return handlerFunc(rw, r)
+			return next(rw, r)
 		}
 	})
 
