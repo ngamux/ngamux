@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 func JSON(rw http.ResponseWriter, data interface{}) error {
@@ -44,4 +45,8 @@ func GetBody(r *http.Request, store interface{}) error {
 	}
 
 	return nil
+}
+
+func TrimSlash(path string) string {
+	return strings.ReplaceAll(path, "//", "/")
 }

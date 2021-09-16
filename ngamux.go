@@ -17,6 +17,7 @@ const (
 type (
 	MiddlewareFunc func(HandlerFunc) HandlerFunc
 	HandlerFunc    func(rw http.ResponseWriter, r *http.Request) error
+	GroupFunc      func(mux *Ngamux)
 )
 
 type Config struct {
@@ -25,6 +26,7 @@ type Config struct {
 }
 
 type Ngamux struct {
+	basePath          string
 	routes            map[string]map[string]Route
 	routesParam       map[string]map[string]Route
 	config            Config
@@ -92,6 +94,7 @@ func NewNgamux(configs ...Config) *Ngamux {
 	}
 
 	router := &Ngamux{
+		basePath:          "/",
 		routes:            routesMap,
 		routesParam:       make(map[string]map[string]Route),
 		config:            config,
@@ -173,13 +176,11 @@ func (r *Ngamux) getRoute(method string, path string) Route {
 	return foundRoute
 }
 
-func (mux *Ngamux) Group(path string, middlewares ...http.HandlerFunc) *group {
-	group := &group{
-		parent:      mux,
-		middlewares: middlewares,
-		path:        path,
-	}
-	return group
+func (mux *Ngamux) GroupPrefix(prefix string, fn GroupFunc) {
+	m := mux.copy()
+	m.basePath = TrimSlash(m.basePath + prefix)
+
+	fn(m)
 }
 
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -214,21 +215,37 @@ func (mux *Ngamux) Use(middleware ...MiddlewareFunc) {
 }
 
 func (mux *Ngamux) Get(path string, handler HandlerFunc, middleware ...MiddlewareFunc) {
-	mux.addRoute(http.MethodGet, buildRoute(path, handler, middleware...))
+	cleanPath := TrimSlash(mux.basePath + path)
+	mux.addRoute(http.MethodGet, buildRoute(cleanPath, handler, middleware...))
 }
 
 func (mux *Ngamux) Post(path string, handler HandlerFunc) {
-	mux.addRoute(http.MethodPost, buildRoute(path, handler))
+	cleanPath := TrimSlash(mux.basePath + path)
+	mux.addRoute(http.MethodPost, buildRoute(cleanPath, handler))
 }
 
 func (mux *Ngamux) Patch(path string, handler HandlerFunc) {
-	mux.addRoute(http.MethodPatch, buildRoute(path, handler))
+	cleanPath := TrimSlash(mux.basePath + path)
+	mux.addRoute(http.MethodPatch, buildRoute(cleanPath, handler))
 }
 
 func (mux *Ngamux) Put(path string, handler HandlerFunc) {
-	mux.addRoute(http.MethodPut, buildRoute(path, handler))
+	cleanPath := TrimSlash(mux.basePath + path)
+	mux.addRoute(http.MethodPut, buildRoute(cleanPath, handler))
 }
 
 func (mux *Ngamux) Delete(path string, handler HandlerFunc) {
-	mux.addRoute(http.MethodDelete, buildRoute(path, handler))
+	cleanPath := TrimSlash(mux.basePath + path)
+	mux.addRoute(http.MethodDelete, buildRoute(cleanPath, handler))
+}
+
+func (mux *Ngamux) copy() *Ngamux {
+	return &Ngamux{
+		basePath:          mux.basePath,
+		routes:            mux.routes,
+		routesParam:       mux.routesParam,
+		config:            mux.config,
+		regexpParamFinded: mux.regexpParamFinded,
+		middleware:        mux.middleware,
+	}
 }
