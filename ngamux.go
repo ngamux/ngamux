@@ -183,6 +183,13 @@ func (mux *Ngamux) GroupPrefix(prefix string, fn GroupFunc) {
 	fn(m)
 }
 
+func (mux *Ngamux) Group(prefix string) *Ngamux {
+	m := mux.copy()
+	m.basePath = TrimSlash(m.basePath + prefix)
+
+	return m
+}
+
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
 	h := handlerNotFound
