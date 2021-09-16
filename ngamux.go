@@ -15,13 +15,15 @@ const (
 )
 
 type (
-	MiddlewareFunc func(HandlerFunc) HandlerFunc
-	HandlerFunc    func(rw http.ResponseWriter, r *http.Request) error
+	MiddlewareFunc   func(HandlerFunc) HandlerFunc
+	HandlerFunc      func(rw http.ResponseWriter, r *http.Request) error
+	PanicHandlerFunc func(http.ResponseWriter, *http.Request, interface{})
 )
 
 type Config struct {
 	RemoveTrailingSlash bool
 	NotFoundHandler     HandlerFunc
+	PanicHandler        PanicHandlerFunc
 }
 
 type Ngamux struct {
@@ -48,6 +50,11 @@ var handlerNotFound = func(rw http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func DefaultPanicHandler(rw http.ResponseWriter, r *http.Request, i interface{}) {
+	rw.WriteHeader(http.StatusInternalServerError)
+	fmt.Fprintln(rw, "panic:", i)
+}
+
 func buildRoute(url string, handler HandlerFunc, middleware ...MiddlewareFunc) Route {
 	return Route{
 		Path:       url,
@@ -65,6 +72,10 @@ func makeConfig(configs ...Config) Config {
 	}
 	if config.NotFoundHandler == nil {
 		config.NotFoundHandler = handlerNotFound
+	}
+
+	if config.PanicHandler == nil {
+		config.PanicHandler = DefaultPanicHandler
 	}
 
 	return config
@@ -183,6 +194,12 @@ func (mux *Ngamux) Group(path string, middlewares ...http.HandlerFunc) *group {
 }
 
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if p := recover(); p != nil {
+			mux.config.PanicHandler(rw, r, p)
+		}
+	}()
+
 	url := r.URL.Path
 	h := handlerNotFound
 	if mux.config.RemoveTrailingSlash && len(url) > 1 && url[len(url)-1] == '/' {
