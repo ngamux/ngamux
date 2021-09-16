@@ -17,7 +17,7 @@ const (
 type (
 	MiddlewareFunc func(HandlerFunc) HandlerFunc
 	HandlerFunc    func(rw http.ResponseWriter, r *http.Request) error
-	GroupFunc      func(mux *Ngamux)
+	GroupFunc      func(*Ngamux)
 )
 
 type Config struct {
