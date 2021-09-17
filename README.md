@@ -5,6 +5,7 @@ Simple HTTP router for Go
 
 * [Installation](#installation)
 * [Examples](#examples)
+* [Provided Middlewares](#provided-middlewares)
 * [Todo](#todo)
 
 ---
@@ -35,6 +36,9 @@ func main() {
   http.ListenAndServe(":8080", mux)
 }
 ```
+
+# Provided Middlewares
+* [Recover](https://github.com/ngamux/ngamux/blob/master/middleware/recover.go)
 
 # Todo
 - [x] Multiple handler (middleware for each route)
