@@ -1,11 +1,13 @@
 package ngamux
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
+// SETUP
 func WithMiddlewares(middleware ...MiddlewareFunc) MiddlewareFunc {
 	return func(next HandlerFunc) HandlerFunc {
 		h := next
@@ -16,6 +18,7 @@ func WithMiddlewares(middleware ...MiddlewareFunc) MiddlewareFunc {
 	}
 }
 
+// REQUEST
 func GetParam(r *http.Request, key string) string {
 	params := r.Context().Value(KeyContextParams).([][]string)
 	for _, param := range params {
@@ -35,6 +38,19 @@ func GetBody(r *http.Request, store interface{}) error {
 	return nil
 }
 
+func ToContext(r *http.Request, key interface{}, value interface{}) *http.Request {
+	ctx := r.Context()
+	ctx = context.WithValue(ctx, key, value)
+	r = r.WithContext(ctx)
+	return r
+}
+
+func FromContext(r *http.Request, key interface{}) interface{} {
+	value := r.Context().Value(key)
+	return value
+}
+
+// RESPONSE
 func JSON(rw http.ResponseWriter, data interface{}) error {
 	rw.Header().Add("content-type", "application/json")
 	jsonData, err := json.Marshal(data)
