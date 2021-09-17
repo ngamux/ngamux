@@ -27,8 +27,8 @@ import(
 
 func main() {
   mux := ngamux.NewNgamux()
-  mux.Get("/", func(rw http.ResponseWriter, r *http.Request) {
-    ngamux.JSON(rw, map[string]string{
+  mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
+    return ngamux.JSON(rw, map[string]string{
       "message": "welcome!",
     })
   })
