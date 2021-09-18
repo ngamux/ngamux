@@ -30,6 +30,18 @@ func GetParam(r *http.Request, key string) string {
 	return ""
 }
 
+func GetQuery(r *http.Request, key string, fallback ...string) string {
+	queries := r.URL.Query()
+	query := queries.Get(key)
+	if query == "" {
+		if len(fallback) > 0 {
+			return fallback[0]
+		}
+		return ""
+	}
+	return query
+}
+
 func GetBody(r *http.Request, store interface{}) error {
 	if err := json.NewDecoder(r.Body).Decode(&store); err != nil {
 		return err
@@ -38,14 +50,14 @@ func GetBody(r *http.Request, store interface{}) error {
 	return nil
 }
 
-func ToContext(r *http.Request, key interface{}, value interface{}) *http.Request {
+func SetContextValue(r *http.Request, key interface{}, value interface{}) *http.Request {
 	ctx := r.Context()
 	ctx = context.WithValue(ctx, key, value)
 	r = r.WithContext(ctx)
 	return r
 }
 
-func FromContext(r *http.Request, key interface{}) interface{} {
+func GetContextValue(r *http.Request, key interface{}) interface{} {
 	value := r.Context().Value(key)
 	return value
 }
