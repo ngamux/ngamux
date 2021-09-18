@@ -42,7 +42,19 @@ func GetQuery(r *http.Request, key string, fallback ...string) string {
 	return query
 }
 
-func GetBody(r *http.Request, store interface{}) error {
+func GetFormValue(r *http.Request, key string, fallback ...string) string {
+	value := r.PostFormValue(key)
+	if value == "" {
+		if len(fallback) > 0 {
+			return fallback[0]
+		}
+		return ""
+	}
+
+	return value
+}
+
+func GetJSON(r *http.Request, store interface{}) error {
 	if err := json.NewDecoder(r.Body).Decode(&store); err != nil {
 		return err
 	}
