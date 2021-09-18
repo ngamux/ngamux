@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 )
 
@@ -52,6 +53,22 @@ func GetFormValue(r *http.Request, key string, fallback ...string) string {
 	}
 
 	return value
+}
+
+func GetFormFile(r *http.Request, key string, maxFileSize ...int64) (*multipart.FileHeader, error) {
+	var maxFileSizeParsed int64 = 10 << 20
+	if len(maxFileSize) > 0 {
+		maxFileSizeParsed = maxFileSize[0]
+	}
+
+	r.ParseMultipartForm(maxFileSizeParsed)
+	file, header, err := r.FormFile(key)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	return header, nil
 }
 
 func GetJSON(r *http.Request, store interface{}) error {
