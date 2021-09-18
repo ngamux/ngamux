@@ -6,7 +6,7 @@ Simple HTTP router for Go
 * [Installation](#installation)
 * [Examples](#examples)
 * [Provided Middlewares](#provided-middlewares)
-* [Todo](#todo)
+* [License](#license)
 
 ---
 
@@ -38,10 +38,8 @@ func main() {
 ```
 
 # Provided Middlewares
-* [CORS](https://github.com/ngamux/ngamux/tree/master/middleware/cors)
-* [Recover](https://github.com/ngamux/ngamux/tree/master/middleware/recover)
+* [CORS](https://github.com/ngamux/middleware/tree/master/cors)
+* [Recover](https://github.com/ngamux/middleware/tree/master/recover)
 
-# Todo
-- [x] Multiple handler (middleware for each route)
-- [x] Route group
-- [x] Route params (in URL parameters)
+# License
+This project is licensed under the [Mozilla Public License 2.0](https://github.com/ngamux/ngamux/blob/master/LICENSE).
