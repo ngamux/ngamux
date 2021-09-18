@@ -38,7 +38,8 @@ func main() {
 ```
 
 # Provided Middlewares
-* [Recover](https://github.com/ngamux/ngamux/blob/master/middleware/recover.go)
+* [CORS](https://github.com/ngamux/ngamux/tree/master/middleware/cors)
+* [Recover](https://github.com/ngamux/ngamux/tree/master/middleware/recover)
 
 # Todo
 - [x] Multiple handler (middleware for each route)
