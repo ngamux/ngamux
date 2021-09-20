@@ -56,6 +56,7 @@ func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
 	mux.middlewares = append(mux.middlewares, middlewares...)
+	mux.config.NotFoundHandler = WithMiddlewares(mux.middlewares...)(mux.config.NotFoundHandler)
 }
 
 func (mux *Ngamux) Get(url string, handler Handler) {
