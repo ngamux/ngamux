@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path"
 	"regexp"
 	"strings"
 )
@@ -144,13 +143,6 @@ func (mux *Ngamux) addRoute(method string, route Route) {
 	mux.routesParam[method][route.Path] = route
 }
 
-func (mux *Ngamux) addRouteFromGroup(method string, route Route) {
-	url := path.Join(mux.path, route.Path)
-	middlewares := mux.middlewares
-	middlewares = append(middlewares, mux.parent.middlewares...)
-	mux.parent.addRoute(method, buildRoute(url, route.Handler, middlewares...))
-}
-
 func (mux *Ngamux) getRoute(method string, path string) Route {
 	foundRoute, ok := mux.routes[method][path]
 	if !ok {
@@ -180,15 +172,6 @@ func (mux *Ngamux) getRoute(method string, path string) Route {
 	}
 
 	return foundRoute
-}
-
-func (mux *Ngamux) Group(url string, middlewares ...MiddlewareFunc) *Ngamux {
-	group := &Ngamux{
-		parent:      mux,
-		path:        url,
-		middlewares: middlewares,
-	}
-	return group
 }
 
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
