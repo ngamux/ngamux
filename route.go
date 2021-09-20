@@ -1,6 +1,7 @@
 package ngamux
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"regexp"
@@ -71,7 +72,13 @@ func (mux *Ngamux) addRoute(method string, route Route) {
 	mux.routesParam[method][route.Path] = route
 }
 
-func (mux *Ngamux) getRoute(method string, path string) Route {
+func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
+	path := r.URL.Path
+	if mux.config.RemoveTrailingSlash && path != "/" && strings.HasSuffix(path, "/") {
+		path = strings.TrimRight(path, "/")
+	}
+
+	method := r.Method
 	foundRoute, ok := mux.routes[method][path]
 	if !ok {
 		for url, route := range mux.routesParam[method] {
@@ -83,7 +90,11 @@ func (mux *Ngamux) getRoute(method string, path string) Route {
 				for i := range params {
 					params[i] = append(params[i], foundParams[0][i+1])
 				}
-				route.Params = params
+				if len(route.Params) > 0 {
+					route.Params = params
+					ctx := context.WithValue(r.Context(), KeyContextParams, params)
+					r = r.WithContext(ctx)
+				}
 				foundRoute = route
 				break
 			}
@@ -99,5 +110,5 @@ func (mux *Ngamux) getRoute(method string, path string) Route {
 		foundRoute.Handler = mux.config.NotFoundHandler
 	}
 
-	return foundRoute
+	return foundRoute, r
 }

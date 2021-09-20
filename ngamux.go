@@ -1,7 +1,6 @@
 package ngamux
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -51,16 +50,7 @@ func NewNgamux(configs ...Config) *Ngamux {
 }
 
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	url := r.URL.Path
-	if mux.config.RemoveTrailingSlash && len(url) > 1 && url[len(url)-1] == '/' {
-		url = url[:len(url)-1]
-	}
-	route := mux.getRoute(r.Method, url)
-	if len(route.Params) > 0 {
-		ctx := context.WithValue(r.Context(), KeyContextParams, route.Params)
-		r = r.WithContext(ctx)
-	}
-
+	route, r := mux.getRoute(r)
 	route.Handler(rw, r)
 }
 
