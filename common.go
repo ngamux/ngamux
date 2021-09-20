@@ -10,7 +10,7 @@ import (
 
 // SETUP
 func WithMiddlewares(middleware ...MiddlewareFunc) MiddlewareFunc {
-	return func(next HandlerFunc) HandlerFunc {
+	return func(next Handler) Handler {
 		h := next
 		for i := len(middleware) - 1; i >= 0; i-- {
 			h = middleware[i](h)

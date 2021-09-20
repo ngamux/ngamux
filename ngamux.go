@@ -14,9 +14,6 @@ const (
 )
 
 type (
-	MiddlewareFunc func(next HandlerFunc) HandlerFunc
-	HandlerFunc    func(rw http.ResponseWriter, r *http.Request) error
-
 	Ngamux struct {
 		parent            *Ngamux
 		path              string
@@ -30,6 +27,7 @@ type (
 
 var (
 	_               http.Handler = &Ngamux{}
+	_               http.Handler = Handler(func(rw http.ResponseWriter, r *http.Request) error { return nil })
 	paramsFinder                 = regexp.MustCompile("(:[a-zA-Z][0-9a-zA-Z]+)")
 	handlerNotFound              = func(rw http.ResponseWriter, r *http.Request) error {
 		rw.WriteHeader(http.StatusNotFound)
@@ -70,7 +68,7 @@ func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
 	mux.middlewares = append(mux.middlewares, middlewares...)
 }
 
-func (mux *Ngamux) Get(url string, handler HandlerFunc) {
+func (mux *Ngamux) Get(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(http.MethodGet, buildRoute(url, handler))
 		return
@@ -78,7 +76,7 @@ func (mux *Ngamux) Get(url string, handler HandlerFunc) {
 	mux.addRoute(http.MethodGet, buildRoute(url, handler, mux.middlewares...))
 }
 
-func (mux *Ngamux) Post(url string, handler HandlerFunc) {
+func (mux *Ngamux) Post(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(http.MethodPost, buildRoute(url, handler))
 		return
@@ -86,7 +84,7 @@ func (mux *Ngamux) Post(url string, handler HandlerFunc) {
 	mux.addRoute(http.MethodPost, buildRoute(url, handler, mux.middlewares...))
 }
 
-func (mux *Ngamux) Patch(url string, handler HandlerFunc) {
+func (mux *Ngamux) Patch(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(http.MethodPatch, buildRoute(url, handler))
 		return
@@ -94,7 +92,7 @@ func (mux *Ngamux) Patch(url string, handler HandlerFunc) {
 	mux.addRoute(http.MethodPatch, buildRoute(url, handler, mux.middlewares...))
 }
 
-func (mux *Ngamux) Put(url string, handler HandlerFunc) {
+func (mux *Ngamux) Put(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(http.MethodPut, buildRoute(url, handler))
 		return
@@ -102,7 +100,7 @@ func (mux *Ngamux) Put(url string, handler HandlerFunc) {
 	mux.addRoute(http.MethodPut, buildRoute(url, handler, mux.middlewares...))
 }
 
-func (mux *Ngamux) Delete(url string, handler HandlerFunc) {
+func (mux *Ngamux) Delete(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(http.MethodDelete, buildRoute(url, handler))
 		return

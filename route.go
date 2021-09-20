@@ -10,7 +10,7 @@ import (
 type (
 	Route struct {
 		Path       string
-		Handler    HandlerFunc
+		Handler    Handler
 		Params     [][]string
 		UrlMathcer *regexp.Regexp
 	}
@@ -32,7 +32,7 @@ func buildRouteMap() routeMap {
 	}
 }
 
-func buildRoute(url string, handler HandlerFunc, middlewares ...MiddlewareFunc) Route {
+func buildRoute(url string, handler Handler, middlewares ...MiddlewareFunc) Route {
 	handler = WithMiddlewares(middlewares...)(handler)
 
 	return Route{

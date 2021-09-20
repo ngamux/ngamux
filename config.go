@@ -2,7 +2,7 @@ package ngamux
 
 type Config struct {
 	RemoveTrailingSlash bool
-	NotFoundHandler     HandlerFunc
+	NotFoundHandler     Handler
 }
 
 func buildConfig(configs ...Config) Config {
