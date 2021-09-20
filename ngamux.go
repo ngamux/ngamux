@@ -90,27 +90,24 @@ func NewNgamux(configs ...Config) *Ngamux {
 		http.MethodTrace:   {},
 	}
 
-	paramsFinder, err := regexp.Compile("(:[a-zA-Z][0-9a-zA-Z]+)")
-	if err != nil {
-		log.Fatal(err.Error())
-		return nil
+	routesParamMap := routeMap{
+		http.MethodGet:     {},
+		http.MethodPost:    {},
+		http.MethodPatch:   {},
+		http.MethodPut:     {},
+		http.MethodDelete:  {},
+		http.MethodOptions: {},
+		http.MethodConnect: {},
+		http.MethodHead:    {},
+		http.MethodTrace:   {},
 	}
 
+	paramsFinder := regexp.MustCompile("(:[a-zA-Z][0-9a-zA-Z]+)")
 	router := &Ngamux{
 		routes:            routesMap,
-		routesParam:       make(routeMap),
+		routesParam:       routesParamMap,
 		config:            config,
 		regexpParamFinded: paramsFinder,
-	}
-
-	for key, val := range router.routes {
-
-		var row = make(map[string]Route)
-		for key2, route := range val {
-			row[key2] = route
-		}
-
-		router.routesParam[key] = row
 	}
 
 	return router
