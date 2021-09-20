@@ -17,11 +17,6 @@ type (
 	MiddlewareFunc func(next HandlerFunc) HandlerFunc
 	HandlerFunc    func(rw http.ResponseWriter, r *http.Request) error
 
-	Config struct {
-		RemoveTrailingSlash bool
-		NotFoundHandler     HandlerFunc
-	}
-
 	Ngamux struct {
 		parent            *Ngamux
 		path              string
@@ -43,23 +38,8 @@ var (
 	}
 )
 
-func makeConfig(configs ...Config) Config {
-	config := Config{
-		RemoveTrailingSlash: true,
-	}
-	if len(configs) > 0 {
-		config = configs[0]
-	}
-	if config.NotFoundHandler == nil {
-		config.NotFoundHandler = handlerNotFound
-	}
-
-	return config
-}
-
 func NewNgamux(configs ...Config) *Ngamux {
-	config := makeConfig(configs...)
-
+	config := buildConfig(configs...)
 	routesMap := buildRouteMap()
 	routesParamMap := buildRouteMap()
 	router := &Ngamux{
