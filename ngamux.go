@@ -18,31 +18,33 @@ const (
 type (
 	MiddlewareFunc func(next HandlerFunc) HandlerFunc
 	HandlerFunc    func(rw http.ResponseWriter, r *http.Request) error
+
+	Config struct {
+		RemoveTrailingSlash bool
+		NotFoundHandler     HandlerFunc
+	}
+
+	Ngamux struct {
+		parent            *Ngamux
+		path              string
+		routes            routeMap
+		routesParam       routeMap
+		config            Config
+		regexpParamFinded *regexp.Regexp
+		middlewares       []MiddlewareFunc
+	}
+
+	Route struct {
+		Path       string
+		Handler    HandlerFunc
+		Params     [][]string
+		UrlMathcer *regexp.Regexp
+	}
+
+	routeMap map[string]map[string]Route
 )
 
-type Config struct {
-	RemoveTrailingSlash bool
-	NotFoundHandler     HandlerFunc
-}
-
-type Ngamux struct {
-	parent            *Ngamux
-	path              string
-	routes            map[string]map[string]Route
-	routesParam       map[string]map[string]Route
-	config            Config
-	regexpParamFinded *regexp.Regexp
-	middlewares       []MiddlewareFunc
-}
-
 var _ http.Handler = &Ngamux{}
-
-type Route struct {
-	Path       string
-	Handler    HandlerFunc
-	Params     [][]string
-	UrlMathcer *regexp.Regexp
-}
 
 var handlerNotFound = func(rw http.ResponseWriter, r *http.Request) error {
 	rw.WriteHeader(http.StatusNotFound)
@@ -76,7 +78,7 @@ func makeConfig(configs ...Config) Config {
 func NewNgamux(configs ...Config) *Ngamux {
 	config := makeConfig(configs...)
 
-	routesMap := map[string]map[string]Route{
+	routesMap := routeMap{
 		http.MethodGet:     {},
 		http.MethodPost:    {},
 		http.MethodPatch:   {},
@@ -96,7 +98,7 @@ func NewNgamux(configs ...Config) *Ngamux {
 
 	router := &Ngamux{
 		routes:            routesMap,
-		routesParam:       make(map[string]map[string]Route),
+		routesParam:       make(routeMap),
 		config:            config,
 		regexpParamFinded: paramsFinder,
 	}
