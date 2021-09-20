@@ -60,7 +60,7 @@ func (mux *Ngamux) addRoute(method string, route Route) {
 		route.Params = append(route.Params, []string{val[0][1:]})
 	}
 
-	pathWithParams = mux.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z]+)")
+	pathWithParams = mux.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z\\.\\-_]+)")
 	route.Path = pathWithParams
 
 	route.UrlMathcer, err = regexp.Compile("^" + pathWithParams + "$")
