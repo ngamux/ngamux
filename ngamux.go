@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path"
 	"regexp"
+	"strings"
 )
 
 type KeyContext int
@@ -117,15 +118,15 @@ func (mux *Ngamux) addRoute(method string, route Route) {
 	var (
 		err            error
 		pathWithParams string
-		subMatchs      = mux.regexpParamFinded.FindAllStringSubmatch(route.Path, -1)
 	)
 
 	// check if route doesn't have url param
-	if len(subMatchs) == 0 {
+	if !strings.Contains(route.Path, ":") {
 		mux.routes[method][route.Path] = route
 		return
 	}
 
+	subMatchs := mux.regexpParamFinded.FindAllStringSubmatch(route.Path, -1)
 	route.Params = [][]string{}
 	for _, val := range subMatchs {
 		route.Params = append(route.Params, []string{val[0][1:]})
