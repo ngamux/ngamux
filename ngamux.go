@@ -1,6 +1,7 @@
 package ngamux
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -25,12 +26,22 @@ type (
 )
 
 var (
-	_               http.Handler = &Ngamux{}
-	_               http.Handler = Handler(func(rw http.ResponseWriter, r *http.Request) error { return nil })
-	paramsFinder                 = regexp.MustCompile("(:[a-zA-Z][0-9a-zA-Z]+)")
-	handlerNotFound              = func(rw http.ResponseWriter, r *http.Request) error {
-		rw.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(rw, "404 page not found")
+	_ http.Handler = &Ngamux{}
+	_ http.Handler = Handler(func(rw http.ResponseWriter, r *http.Request) error { return nil })
+
+	ErrorNotFound         = errors.New("not found")
+	ErrorMethodNotAllowed = errors.New("method not allowed")
+
+	paramsFinder       = regexp.MustCompile("(:[a-zA-Z][0-9a-zA-Z]+)")
+	globalErrorHandler = func(rw http.ResponseWriter, r *http.Request) error {
+		err := GetContextValue(r, "error")
+		if err == ErrorNotFound.Error() {
+			rw.WriteHeader(http.StatusNotFound)
+		} else if err == ErrorMethodNotAllowed.Error() {
+			rw.WriteHeader(http.StatusMethodNotAllowed)
+		}
+
+		fmt.Fprintln(rw, err)
 		return nil
 	}
 )
@@ -56,7 +67,7 @@ func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
 	mux.middlewares = append(mux.middlewares, middlewares...)
-	mux.config.NotFoundHandler = WithMiddlewares(mux.middlewares...)(mux.config.NotFoundHandler)
+	mux.config.GlobalErrorHandler = WithMiddlewares(mux.middlewares...)(mux.config.GlobalErrorHandler)
 }
 
 func (mux *Ngamux) Get(url string, handler Handler) {

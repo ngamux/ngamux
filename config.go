@@ -2,7 +2,7 @@ package ngamux
 
 type Config struct {
 	RemoveTrailingSlash bool
-	NotFoundHandler     Handler
+	GlobalErrorHandler  Handler
 }
 
 func buildConfig(configs ...Config) Config {
@@ -12,8 +12,8 @@ func buildConfig(configs ...Config) Config {
 	if len(configs) > 0 {
 		config = configs[0]
 	}
-	if config.NotFoundHandler == nil {
-		config.NotFoundHandler = handlerNotFound
+	if config.GlobalErrorHandler == nil {
+		config.GlobalErrorHandler = globalErrorHandler
 	}
 
 	return config
