@@ -17,9 +17,9 @@ func (mux *Ngamux) Group(url string, middlewares ...MiddlewareFunc) *Ngamux {
 	return group
 }
 
-func (mux *Ngamux) addRouteFromGroup(method string, route Route) {
+func (mux *Ngamux) addRouteFromGroup(route Route) {
 	url := path.Join(mux.path, route.Path)
 	middlewares := mux.middlewares
 	middlewares = append(middlewares, mux.parent.middlewares...)
-	mux.parent.addRoute(method, buildRoute(url, route.Handler, middlewares...))
+	mux.parent.addRoute(buildRoute(url, route.Method, route.Handler, middlewares...))
 }

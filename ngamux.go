@@ -37,8 +37,8 @@ var (
 
 func NewNgamux(configs ...Config) *Ngamux {
 	config := buildConfig(configs...)
-	routesMap := buildRouteMap()
-	routesParamMap := buildRouteMap()
+	routesMap := routeMap{}
+	routesParamMap := routeMap{}
 	router := &Ngamux{
 		routes:            routesMap,
 		routesParam:       routesParamMap,
@@ -61,53 +61,53 @@ func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
 
 func (mux *Ngamux) Get(url string, handler Handler) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(http.MethodGet, buildRoute(url, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodGet, handler))
 		return
 	}
-	mux.addRoute(http.MethodGet, buildRoute(url, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodGet, handler, mux.middlewares...))
 }
 
 func (mux *Ngamux) Post(url string, handler Handler) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(http.MethodPost, buildRoute(url, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodPost, handler))
 		return
 	}
-	mux.addRoute(http.MethodPost, buildRoute(url, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodPost, handler, mux.middlewares...))
 }
 
 func (mux *Ngamux) Patch(url string, handler Handler) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(http.MethodPatch, buildRoute(url, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodPatch, handler))
 		return
 	}
-	mux.addRoute(http.MethodPatch, buildRoute(url, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodPatch, handler, mux.middlewares...))
 }
 
 func (mux *Ngamux) Put(url string, handler Handler) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(http.MethodPut, buildRoute(url, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodPut, handler))
 		return
 	}
-	mux.addRoute(http.MethodPut, buildRoute(url, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodPut, handler, mux.middlewares...))
 }
 
 func (mux *Ngamux) Delete(url string, handler Handler) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(http.MethodDelete, buildRoute(url, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodDelete, handler))
 		return
 	}
-	mux.addRoute(http.MethodDelete, buildRoute(url, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodDelete, handler, mux.middlewares...))
 }
 
 func (mux *Ngamux) All(url string, handler Handler) {
 	if mux.parent != nil {
 		for method := range mux.routes {
-			mux.addRouteFromGroup(method, buildRoute(url, handler))
+			mux.addRouteFromGroup(buildRoute(url, method, handler))
 		}
 		return
 	}
 
 	for method := range mux.routes {
-		mux.addRoute(method, buildRoute(url, handler, mux.middlewares...))
+		mux.addRoute(buildRoute(url, method, handler, mux.middlewares...))
 	}
 }

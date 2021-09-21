@@ -11,29 +11,16 @@ import (
 type (
 	Route struct {
 		Path       string
+		Method     string
 		Handler    Handler
 		Params     [][]string
 		UrlMathcer *regexp.Regexp
 	}
 
-	routeMap map[string]map[string]Route
+	routeMap map[string]Route
 )
 
-func buildRouteMap() routeMap {
-	return routeMap{
-		http.MethodGet:     {},
-		http.MethodPost:    {},
-		http.MethodPatch:   {},
-		http.MethodPut:     {},
-		http.MethodDelete:  {},
-		http.MethodOptions: {},
-		http.MethodConnect: {},
-		http.MethodHead:    {},
-		http.MethodTrace:   {},
-	}
-}
-
-func buildRoute(url string, handler Handler, middlewares ...MiddlewareFunc) Route {
+func buildRoute(url string, status string, handler Handler, middlewares ...MiddlewareFunc) Route {
 	handler = WithMiddlewares(middlewares...)(handler)
 
 	return Route{
@@ -42,7 +29,7 @@ func buildRoute(url string, handler Handler, middlewares ...MiddlewareFunc) Rout
 	}
 }
 
-func (mux *Ngamux) addRoute(method string, route Route) {
+func (mux *Ngamux) addRoute(route Route) {
 	var (
 		err            error
 		pathWithParams string
@@ -50,7 +37,7 @@ func (mux *Ngamux) addRoute(method string, route Route) {
 
 	// check if route doesn't have url param
 	if !strings.Contains(route.Path, ":") {
-		mux.routes[method][route.Path] = route
+		mux.routes[route.Path] = route
 		return
 	}
 
@@ -69,7 +56,7 @@ func (mux *Ngamux) addRoute(method string, route Route) {
 		return
 	}
 
-	mux.routesParam[method][route.Path] = route
+	mux.routesParam[route.Path] = route
 }
 
 func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
@@ -78,10 +65,9 @@ func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
 		path = strings.TrimRight(path, "/")
 	}
 
-	method := r.Method
-	foundRoute, ok := mux.routes[method][path]
+	foundRoute, ok := mux.routes[path]
 	if !ok {
-		for url, route := range mux.routesParam[method] {
+		for url, route := range mux.routesParam {
 
 			if route.UrlMathcer.MatchString(path) {
 				foundParams := route.UrlMathcer.FindAllStringSubmatch(path, -1)
