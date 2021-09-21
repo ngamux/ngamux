@@ -120,11 +120,11 @@ func JSON(rw http.ResponseWriter, data interface{}) error {
 }
 
 func JSONWithStatus(rw http.ResponseWriter, status int, data interface{}) error {
+	rw.WriteHeader(status)
 	err := JSON(rw, data)
 	if err != nil {
 		return err
 	}
-	rw.WriteHeader(status)
 
 	return nil
 }
