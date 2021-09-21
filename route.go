@@ -14,17 +14,18 @@ type (
 		Method     string
 		Handler    Handler
 		Params     [][]string
-		UrlMathcer *regexp.Regexp
+		UrlMatcher *regexp.Regexp
 	}
 
 	routeMap map[string]Route
 )
 
-func buildRoute(url string, status string, handler Handler, middlewares ...MiddlewareFunc) Route {
+func buildRoute(url string, method string, handler Handler, middlewares ...MiddlewareFunc) Route {
 	handler = WithMiddlewares(middlewares...)(handler)
 
 	return Route{
 		Path:    url,
+		Method:  method,
 		Handler: handler,
 	}
 }
@@ -50,7 +51,7 @@ func (mux *Ngamux) addRoute(route Route) {
 	pathWithParams = mux.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z\\.\\-_]+)")
 	route.Path = pathWithParams
 
-	route.UrlMathcer, err = regexp.Compile("^" + pathWithParams + "$")
+	route.UrlMatcher, err = regexp.Compile("^" + pathWithParams + "$")
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -68,9 +69,8 @@ func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
 	foundRoute, ok := mux.routes[path]
 	if !ok {
 		for url, route := range mux.routesParam {
-
-			if route.UrlMathcer.MatchString(path) {
-				foundParams := route.UrlMathcer.FindAllStringSubmatch(path, -1)
+			if route.UrlMatcher.MatchString(path) {
+				foundParams := route.UrlMatcher.FindAllStringSubmatch(path, -1)
 				params := make([][]string, len(route.Params))
 				copy(params, route.Params)
 				for i := range params {
@@ -94,6 +94,9 @@ func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
 
 	if foundRoute.Handler == nil {
 		r = SetContextValue(r, "error", ErrorNotFound.Error())
+		foundRoute.Handler = mux.config.GlobalErrorHandler
+	} else if foundRoute.Method != r.Method {
+		r = SetContextValue(r, "error", ErrorMethodNotAllowed.Error())
 		foundRoute.Handler = mux.config.GlobalErrorHandler
 	}
 
