@@ -110,19 +110,17 @@ func StringWithStatus(rw http.ResponseWriter, status int, data string) error {
 
 func JSON(rw http.ResponseWriter, data interface{}) error {
 	rw.Header().Add("content-type", "application/json")
-	jsonData, err := json.Marshal(data)
-	if err != nil {
+	if err := json.NewEncoder(rw).Encode(data); err != nil {
 		return err
 	}
 
-	fmt.Fprint(rw, string(jsonData))
 	return nil
 }
 
 func JSONWithStatus(rw http.ResponseWriter, status int, data interface{}) error {
+	rw.Header().Add("content-type", "application/json")
 	rw.WriteHeader(status)
-	err := JSON(rw, data)
-	if err != nil {
+	if err := json.NewEncoder(rw).Encode(data); err != nil {
 		return err
 	}
 
