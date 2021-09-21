@@ -8,6 +8,10 @@ import (
 	"net/http"
 )
 
+type (
+	Map map[string]interface{}
+)
+
 // SETUP
 func WithMiddlewares(middleware ...MiddlewareFunc) MiddlewareFunc {
 	return func(next Handler) Handler {
