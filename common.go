@@ -101,6 +101,13 @@ func String(rw http.ResponseWriter, data string) error {
 	fmt.Fprintln(rw, data)
 	return nil
 }
+
+func StringWithStatus(rw http.ResponseWriter, status int, data string) error {
+	String(rw, data)
+	rw.WriteHeader(status)
+	return nil
+}
+
 func JSON(rw http.ResponseWriter, data interface{}) error {
 	rw.Header().Add("content-type", "application/json")
 	jsonData, err := json.Marshal(data)
@@ -113,11 +120,11 @@ func JSON(rw http.ResponseWriter, data interface{}) error {
 }
 
 func JSONWithStatus(rw http.ResponseWriter, status int, data interface{}) error {
-	rw.WriteHeader(status)
 	err := JSON(rw, data)
 	if err != nil {
 		return err
 	}
+	rw.WriteHeader(status)
 
 	return nil
 }
