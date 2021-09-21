@@ -96,6 +96,11 @@ func GetContextValue(r *http.Request, key interface{}) interface{} {
 }
 
 // RESPONSE
+func String(rw http.ResponseWriter, data string) error {
+	rw.Header().Add("content-type", "text/plain")
+	fmt.Fprintln(rw, data)
+	return nil
+}
 func JSON(rw http.ResponseWriter, data interface{}) error {
 	rw.Header().Add("content-type", "application/json")
 	jsonData, err := json.Marshal(data)
