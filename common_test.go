@@ -43,3 +43,22 @@ func TestGetParam(t *testing.T) {
 		t.Errorf("TestGetParam need %v, but got %v", "\"\"", result)
 	}
 }
+
+func TestGetQuery(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/?id=1", nil)
+	result := GetQuery(req, "id")
+
+	if result != "1" {
+		t.Errorf("TestGetQuery need %v, but got %v", "1", result)
+	}
+
+	result = GetQuery(req, "slug", "undefined")
+	if result != "undefined" {
+		t.Errorf("TestGetQuery need %v, but got %v", "undefined", result)
+	}
+
+	result = GetQuery(req, "slug")
+	if result != "" {
+		t.Errorf("TestGetQuery need %v, but got %v", "\"\"", result)
+	}
+}
