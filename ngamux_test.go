@@ -88,3 +88,22 @@ func TestPost(t *testing.T) {
 		t.Errorf("TestPost need %v, but got %v", expected, result)
 	}
 }
+
+func TestPut(t *testing.T) {
+	mux := NewNgamux()
+	mux.Put("/", func(rw http.ResponseWriter, r *http.Request) error {
+		return String(rw, "ok")
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPut, "/", nil)
+	mux.ServeHTTP(rec, req)
+
+	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+	expected := "ok"
+
+	if result != expected {
+		t.Errorf("TestPut need %v, but got %v", expected, result)
+	}
+}
+
