@@ -117,3 +117,18 @@ func TestGetContextValue(t *testing.T) {
 		t.Errorf("TestGetContextValue need %v, but got %v", nil, slug)
 	}
 }
+
+func TestString(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		String(rw, "ok")
+	})
+	handler.ServeHTTP(rec, req)
+
+	result := rec.Body.String()
+	expected := "ok\n"
+	if result != expected {
+		t.Errorf("TestString need %v, but got %v", expected, result)
+	}
+}
