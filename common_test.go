@@ -171,3 +171,25 @@ func TestJSON(t *testing.T) {
 	}
 }
 
+func TestJSONWithStatus(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		JSONWithStatus(rw, http.StatusOK, Map{
+			"id": 1,
+		})
+	})
+	handler.ServeHTTP(rec, req)
+
+	resultBody := strings.ReplaceAll(rec.Body.String(), "\n", "")
+	expectedBody := `{"id":1}`
+	if resultBody != expectedBody {
+		t.Errorf("TestJSONWithStatus need %v, but got %v", expectedBody, resultBody)
+	}
+
+	resultStatus := rec.Result().StatusCode
+	expectedStatus := http.StatusOK
+	if resultStatus != expectedStatus {
+		t.Errorf("TestJSONWithStatus need %v, but got %v", expectedStatus, resultStatus)
+	}
+}
