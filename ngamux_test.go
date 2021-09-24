@@ -107,3 +107,20 @@ func TestPut(t *testing.T) {
 	}
 }
 
+func TestPatch(t *testing.T) {
+	mux := NewNgamux()
+	mux.Patch("/", func(rw http.ResponseWriter, r *http.Request) error {
+		return String(rw, "ok")
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPatch, "/", nil)
+	mux.ServeHTTP(rec, req)
+
+	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+	expected := "ok"
+
+	if result != expected {
+		t.Errorf("TestPatch need %v, but got %v", expected, result)
+	}
+}
