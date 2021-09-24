@@ -87,3 +87,18 @@ func TestGetJSON(t *testing.T) {
 		t.Errorf("TestGetJSON need %v, but got %v", 1, id)
 	}
 }
+
+func TestSetContextValue(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req = SetContextValue(req, "id", 1)
+
+	id := req.Context().Value("id")
+	if id != 1 {
+		t.Errorf("TestGetJSON need %v, but got %v", 1, id)
+	}
+
+	slug := req.Context().Value("slug")
+	if id != 1 {
+		t.Errorf("TestGetJSON need %v, but got %v", nil, slug)
+	}
+}
