@@ -132,3 +132,25 @@ func TestString(t *testing.T) {
 		t.Errorf("TestString need %v, but got %v", expected, result)
 	}
 }
+
+func TestStringWithStatus(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		StringWithStatus(rw, http.StatusOK, "ok")
+	})
+	handler.ServeHTTP(rec, req)
+
+	resultBody := rec.Body.String()
+	expectedBody := "ok\n"
+	if resultBody != expectedBody {
+		t.Errorf("TestStringWithStatus need %v, but got %v", expectedBody, resultBody)
+	}
+
+	resultStatus := rec.Result().StatusCode
+	expectedStatus := http.StatusOK
+	if resultStatus != expectedStatus {
+		t.Errorf("TestStringWithStatus need %v, but got %v", expectedStatus, resultStatus)
+	}
+}
+
