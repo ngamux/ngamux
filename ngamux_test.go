@@ -143,3 +143,23 @@ func TestDelete(t *testing.T) {
 	}
 }
 
+func TestAll(t *testing.T) {
+	mux := NewNgamux()
+	mux.All("/", func(rw http.ResponseWriter, r *http.Request) error {
+		return String(rw, "ok")
+	})
+
+	methods := []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete}
+	for _, method := range methods {
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(method, "/", nil)
+		mux.ServeHTTP(rec, req)
+
+		result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+		expected := "ok"
+
+		if result != expected {
+			t.Errorf("TestAll need %v, but got %v", expected, result)
+		}
+	}
+}
