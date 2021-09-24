@@ -93,10 +93,10 @@ func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
 	}
 
 	if foundRoute.Handler == nil {
-		r = SetContextValue(r, "error", ErrorNotFound.Error())
+		r = SetContextValue(r, "error", ErrorNotFound)
 		foundRoute.Handler = mux.config.GlobalErrorHandler
 	} else if foundRoute.Method != r.Method {
-		r = SetContextValue(r, "error", ErrorMethodNotAllowed.Error())
+		r = SetContextValue(r, "error", ErrorMethodNotAllowed)
 		foundRoute.Handler = mux.config.GlobalErrorHandler
 	}
 
