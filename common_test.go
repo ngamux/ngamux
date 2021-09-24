@@ -94,11 +94,26 @@ func TestSetContextValue(t *testing.T) {
 
 	id := req.Context().Value("id")
 	if id != 1 {
-		t.Errorf("TestGetJSON need %v, but got %v", 1, id)
+		t.Errorf("TestSetContextValue need %v, but got %v", 1, id)
 	}
 
 	slug := req.Context().Value("slug")
 	if id != 1 {
-		t.Errorf("TestGetJSON need %v, but got %v", nil, slug)
+		t.Errorf("TestSetContextValue need %v, but got %v", nil, slug)
+	}
+}
+
+func TestGetContextValue(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req = req.WithContext(context.WithValue(req.Context(), "id", 1))
+
+	id := GetContextValue(req, "id")
+	if id != 1 {
+		t.Errorf("TestGetContextValue need %v, but got %v", 1, id)
+	}
+
+	slug := GetContextValue(req, "slug")
+	if id != 1 {
+		t.Errorf("TestGetContextValue need %v, but got %v", nil, slug)
 	}
 }
