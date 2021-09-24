@@ -112,13 +112,9 @@ func (mux *Ngamux) Delete(url string, handler Handler) {
 
 func (mux *Ngamux) All(url string, handler Handler) {
 	if mux.parent != nil {
-		for method := range mux.routes {
-			mux.addRouteFromGroup(buildRoute(url, method, handler))
-		}
+		mux.addRouteFromGroup(buildRoute(url, "*", handler))
 		return
 	}
 
-	for method := range mux.routes {
-		mux.addRoute(buildRoute(url, method, handler, mux.middlewares...))
-	}
+	mux.addRoute(buildRoute(url, "*", handler, mux.middlewares...))
 }
