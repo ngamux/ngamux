@@ -20,3 +20,28 @@ func TestBuildRoute(t *testing.T) {
 		t.Errorf("TestBuildRoute need %v, but got %v", expected.Method, result.Method)
 	}
 }
+
+func TestAddRoute(t *testing.T) {
+	mux := NewNgamux()
+	mux.addRoute(buildRoute("/", http.MethodGet, nil))
+	mux.addRoute(buildRoute("/a", http.MethodGet, nil))
+	mux.addRoute(buildRoute("/b", http.MethodGet, nil))
+	result := len(mux.routes)
+	expected := 3
+
+	if result != expected {
+		t.Errorf("TestAddRoute need %v, but got %v", expected, result)
+	}
+
+	mux = NewNgamux()
+	mux.addRoute(buildRoute("/a/:a", http.MethodGet, nil))
+	mux.addRoute(buildRoute("/b/:b", http.MethodGet, nil))
+	mux.addRoute(buildRoute("/c/:c", http.MethodGet, nil))
+	result = len(mux.routesParam)
+	expected = 3
+
+	if result != expected {
+		t.Errorf("TestAddRoute need %v, but got %v", expected, result)
+	}
+}
+
