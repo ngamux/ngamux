@@ -5,6 +5,7 @@ Simple HTTP router for Go
 [![Go Version](https://img.shields.io/github/go-mod/go-version/ngamux/ngamux.svg)](https://github.com/ngamux/ngamux)
 [![GoDoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/ngamux/ngamux)
 [![GoReportCard](https://goreportcard.com/badge/github.com/ngamux/ngamux)](https://goreportcard.com/report/github.com/ngamux/ngamux)
+[![Coverage Status](https://coveralls.io/repos/github/ngamux/ngamux/badge.svg?branch=master)](https://coveralls.io/github/ngamux/ngamux?branch=master)
 
 ---
 
