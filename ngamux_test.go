@@ -1,6 +1,7 @@
 package ngamux
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -161,5 +162,26 @@ func TestAll(t *testing.T) {
 		if result != expected {
 			t.Errorf("TestAll need %v, but got %v", expected, result)
 		}
+	}
+}
+
+func TestErrorResponse(t *testing.T) {
+	mux := NewNgamux()
+	mux.Get("/error-method", func(rw http.ResponseWriter, r *http.Request) error {
+		return errors.New("something bad")
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/error-method", nil)
+
+	mux.ServeHTTP(rec, req)
+
+	result := rec.Result()
+	resBody := strings.ReplaceAll(rec.Body.String(), "\n", "")
+	if resBody != "something bad" {
+		t.Errorf("Expect body to \"something bad\", but got %s", resBody)
+	}
+	if result.StatusCode != 500 {
+		t.Errorf("Status should be 500, but got %d", result.StatusCode)
 	}
 }

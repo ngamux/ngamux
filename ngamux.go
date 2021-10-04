@@ -62,7 +62,11 @@ func NewNgamux(configs ...Config) *Ngamux {
 
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, r := mux.getRoute(r)
-	route.Handler(rw, r)
+	err := route.Handler(rw, r)
+	if err != nil {
+		rw.WriteHeader(500)
+		rw.Write([]byte(err.Error()))
+	}
 }
 
 func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
