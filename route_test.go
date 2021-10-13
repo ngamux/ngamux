@@ -28,7 +28,7 @@ func TestAddRoute(t *testing.T) {
 	mux.addRoute(buildRoute("/", http.MethodGet, nil))
 	mux.addRoute(buildRoute("/a", http.MethodGet, nil))
 	mux.addRoute(buildRoute("/b", http.MethodGet, nil))
-	result := len(mux.routes)
+	result := len(mux.ngamux().routes)
 	expected := 3
 
 	if result != expected {
@@ -39,7 +39,7 @@ func TestAddRoute(t *testing.T) {
 	mux.addRoute(buildRoute("/a/:a", http.MethodGet, nil))
 	mux.addRoute(buildRoute("/b/:b", http.MethodGet, nil))
 	mux.addRoute(buildRoute("/c/:c", http.MethodGet, nil))
-	result = len(mux.routesParam)
+	result = len(mux.ngamux().routesParam)
 	expected = 3
 
 	if result != expected {
