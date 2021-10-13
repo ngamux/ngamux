@@ -47,13 +47,13 @@ func (mux *Ngamux) addRoute(route Route) {
 	}
 
 	// building route with url param
-	subMatchs := mux.regexpParamFinded.FindAllStringSubmatch(route.Path, -1)
+	subMatchs := mux.regexpParamFounded.FindAllStringSubmatch(route.Path, -1)
 	route.Params = [][]string{}
 	for _, val := range subMatchs {
 		route.Params = append(route.Params, []string{val[0][1:]})
 	}
 
-	pathWithParams = mux.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z\\.\\-_]+)")
+	pathWithParams = mux.regexpParamFounded.ReplaceAllString(route.Path, "([0-9a-zA-Z\\.\\-_]+)")
 	route.Path = pathWithParams
 
 	route.UrlMatcher, err = regexp.Compile("^" + pathWithParams + "$")
