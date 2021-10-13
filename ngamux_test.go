@@ -12,26 +12,26 @@ import (
 func TestNewNgamux(t *testing.T) {
 	result := NewNgamux()
 	expected := &Ngamux{
-		routes:            routeMap{},
-		routesParam:       routeMap{},
-		config:            buildConfig(),
-		regexpParamFinded: paramsFinder,
+		routes:             routeMap{},
+		routesParam:        routeMap{},
+		config:             buildConfig(),
+		regexpParamFounded: paramsFinder,
 	}
 
-	if !reflect.DeepEqual(result.routes, expected.routes) {
-		t.Errorf("TestNewNgamux need %v, but got %v", expected.routes, result.routes)
+	if !reflect.DeepEqual(result.ngamux().routes, expected.routes) {
+		t.Errorf("TestNewNgamux need %v, but got %v", expected.routes, result.ngamux().routes)
 	}
 
-	if !reflect.DeepEqual(result.routesParam, expected.routesParam) {
-		t.Errorf("TestNewNgamux need %v, but got %v", expected.routesParam, result.routesParam)
+	if !reflect.DeepEqual(result.ngamux().routesParam, expected.routesParam) {
+		t.Errorf("TestNewNgamux need %v, but got %v", expected.routesParam, result.ngamux().routesParam)
 	}
 
-	if result.config.RemoveTrailingSlash != expected.config.RemoveTrailingSlash {
-		t.Errorf("TestNewNgamux need %v, but got %v", expected.config.RemoveTrailingSlash, result.config.RemoveTrailingSlash)
+	if result.ngamux().config.RemoveTrailingSlash != expected.config.RemoveTrailingSlash {
+		t.Errorf("TestNewNgamux need %v, but got %v", expected.config.RemoveTrailingSlash, result.ngamux().config.RemoveTrailingSlash)
 	}
 
-	if result.regexpParamFinded != expected.regexpParamFinded {
-		t.Errorf("TestNewNgamux need %v, but got %v", expected.regexpParamFinded, result.regexpParamFinded)
+	if result.ngamux().regexpParamFounded != expected.regexpParamFounded {
+		t.Errorf("TestNewNgamux need %v, but got %v", expected.regexpParamFounded, result.ngamux().regexpParamFounded)
 	}
 }
 
@@ -46,7 +46,7 @@ func TestUse(t *testing.T) {
 	mux.Use(middleware)
 	mux.Use(middleware)
 
-	result := len(mux.middlewares)
+	result := len(mux.ngamux().middlewares)
 	expected := 3
 
 	if result != expected {
