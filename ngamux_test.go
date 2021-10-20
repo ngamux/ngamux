@@ -4,12 +4,14 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/golang-must/must"
 )
 
 func TestNewNgamux(t *testing.T) {
+	must := must.New(t)
 	result := NewNgamux()
 	expected := &Ngamux{
 		routes:            routeMap{},
@@ -18,24 +20,14 @@ func TestNewNgamux(t *testing.T) {
 		regexpParamFinded: paramsFinder,
 	}
 
-	if !reflect.DeepEqual(result.routes, expected.routes) {
-		t.Errorf("TestNewNgamux need %v, but got %v", expected.routes, result.routes)
-	}
-
-	if !reflect.DeepEqual(result.routesParam, expected.routesParam) {
-		t.Errorf("TestNewNgamux need %v, but got %v", expected.routesParam, result.routesParam)
-	}
-
-	if result.config.RemoveTrailingSlash != expected.config.RemoveTrailingSlash {
-		t.Errorf("TestNewNgamux need %v, but got %v", expected.config.RemoveTrailingSlash, result.config.RemoveTrailingSlash)
-	}
-
-	if result.regexpParamFinded != expected.regexpParamFinded {
-		t.Errorf("TestNewNgamux need %v, but got %v", expected.regexpParamFinded, result.regexpParamFinded)
-	}
+	must.Equal(expected.routes, result.routes)
+	must.Equal(expected.routesParam, result.routesParam)
+	must.Equal(expected.config.RemoveTrailingSlash, result.config.RemoveTrailingSlash)
+	must.Equal(expected.regexpParamFinded, result.regexpParamFinded)
 }
 
 func TestUse(t *testing.T) {
+	must := must.New(t)
 	mux := NewNgamux()
 	middleware := func(next Handler) Handler {
 		return func(rw http.ResponseWriter, r *http.Request) error {
@@ -49,12 +41,11 @@ func TestUse(t *testing.T) {
 	result := len(mux.middlewares)
 	expected := 3
 
-	if result != expected {
-		t.Errorf("TestUse need %v, but got %v", expected, result)
-	}
+	must.Equal(expected, result)
 }
 
 func TestGet(t *testing.T) {
+	must := must.New(t)
 	mux := NewNgamux()
 	mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
@@ -66,13 +57,11 @@ func TestGet(t *testing.T) {
 
 	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
 	expected := "ok"
-
-	if result != expected {
-		t.Errorf("TestGet need %v, but got %v", expected, result)
-	}
+	must.Equal(expected, result)
 }
 
 func TestPost(t *testing.T) {
+	must := must.New(t)
 	mux := NewNgamux()
 	mux.Post("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
@@ -84,13 +73,11 @@ func TestPost(t *testing.T) {
 
 	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
 	expected := "ok"
-
-	if result != expected {
-		t.Errorf("TestPost need %v, but got %v", expected, result)
-	}
+	must.Equal(expected, result)
 }
 
 func TestPut(t *testing.T) {
+	must := must.New(t)
 	mux := NewNgamux()
 	mux.Put("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
@@ -102,13 +89,11 @@ func TestPut(t *testing.T) {
 
 	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
 	expected := "ok"
-
-	if result != expected {
-		t.Errorf("TestPut need %v, but got %v", expected, result)
-	}
+	must.Equal(expected, result)
 }
 
 func TestPatch(t *testing.T) {
+	must := must.New(t)
 	mux := NewNgamux()
 	mux.Patch("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
@@ -120,13 +105,11 @@ func TestPatch(t *testing.T) {
 
 	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
 	expected := "ok"
-
-	if result != expected {
-		t.Errorf("TestPatch need %v, but got %v", expected, result)
-	}
+	must.Equal(expected, result)
 }
 
 func TestDelete(t *testing.T) {
+	must := must.New(t)
 	mux := NewNgamux()
 	mux.Delete("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
@@ -138,13 +121,11 @@ func TestDelete(t *testing.T) {
 
 	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
 	expected := "ok"
-
-	if result != expected {
-		t.Errorf("TestDelete need %v, but got %v", expected, result)
-	}
+	must.Equal(expected, result)
 }
 
 func TestAll(t *testing.T) {
+	must := must.New(t)
 	mux := NewNgamux()
 	mux.All("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
@@ -158,14 +139,12 @@ func TestAll(t *testing.T) {
 
 		result := strings.ReplaceAll(rec.Body.String(), "\n", "")
 		expected := "ok"
-
-		if result != expected {
-			t.Errorf("TestAll need %v, but got %v", expected, result)
-		}
+		must.Equal(expected, result)
 	}
 }
 
 func TestErrorResponse(t *testing.T) {
+	must := must.New(t)
 	mux := NewNgamux()
 	mux.Get("/error-method", func(rw http.ResponseWriter, r *http.Request) error {
 		return errors.New("something bad")
@@ -177,11 +156,11 @@ func TestErrorResponse(t *testing.T) {
 	mux.ServeHTTP(rec, req)
 
 	result := rec.Result()
-	resBody := strings.ReplaceAll(rec.Body.String(), "\n", "")
-	if resBody != "something bad" {
-		t.Errorf("Expect body to \"something bad\", but got %s", resBody)
-	}
-	if result.StatusCode != 500 {
-		t.Errorf("Status should be 500, but got %d", result.StatusCode)
-	}
+	resultBody := strings.ReplaceAll(rec.Body.String(), "\n", "")
+	expectedBody := "something bad"
+	must.Equal(expectedBody, resultBody)
+
+	resultStatus := result.StatusCode
+	expectedStatus := 500
+	must.Equal(expectedStatus, resultStatus)
 }
