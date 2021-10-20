@@ -2,17 +2,17 @@ package ngamux
 
 import (
 	"testing"
+
+	"github.com/golang-must/must"
 )
 
 func TestBuildConfig(t *testing.T) {
+	must := must.New(t)
 	result := buildConfig()
 	expected := Config{
 		RemoveTrailingSlash: true,
 	}
-
-	if result.RemoveTrailingSlash != expected.RemoveTrailingSlash {
-		t.Errorf("TestBuildConfig need %v, but got %v", expected.RemoveTrailingSlash, result.RemoveTrailingSlash)
-	}
+	must.Equal(expected.RemoveTrailingSlash, result.RemoveTrailingSlash)
 
 	result = buildConfig(Config{
 		RemoveTrailingSlash: false,
@@ -20,8 +20,5 @@ func TestBuildConfig(t *testing.T) {
 	expected = Config{
 		RemoveTrailingSlash: false,
 	}
-
-	if result.RemoveTrailingSlash != expected.RemoveTrailingSlash {
-		t.Errorf("TestBuildConfig need %v, but got %v", expected.RemoveTrailingSlash, result.RemoveTrailingSlash)
-	}
+	must.Equal(expected.RemoveTrailingSlash, result.RemoveTrailingSlash)
 }
