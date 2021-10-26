@@ -115,21 +115,21 @@ func GetContextValue(r *http.Request, key interface{}) interface{} {
 
 // RESPONSE
 
-// String write string data to respone body
+// String write string data to response body
 func String(rw http.ResponseWriter, data string) error {
 	rw.Header().Add("content-type", "text/plain")
 	fmt.Fprintln(rw, data)
 	return nil
 }
 
-// StringWithStatus write string data to respone body with status code
+// StringWithStatus write string data to response body with status code
 func StringWithStatus(rw http.ResponseWriter, status int, data string) error {
 	String(rw, data)
 	rw.WriteHeader(status)
 	return nil
 }
 
-// JSON write JSON data to respone
+// JSON write JSON data to response
 func JSON(rw http.ResponseWriter, data interface{}) error {
 	rw.Header().Add("content-type", "application/json")
 	if err := json.NewEncoder(rw).Encode(data); err != nil {
@@ -139,7 +139,7 @@ func JSON(rw http.ResponseWriter, data interface{}) error {
 	return nil
 }
 
-// JSONWithStatus write JSON data to respone body with status code
+// JSONWithStatus write JSON data to response body with status code
 func JSONWithStatus(rw http.ResponseWriter, status int, data interface{}) error {
 	rw.Header().Add("content-type", "application/json")
 	rw.WriteHeader(status)
