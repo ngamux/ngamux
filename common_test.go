@@ -78,12 +78,16 @@ func TestSetContextValue(t *testing.T) {
 	must.Nil(slug)
 }
 
+type Key string
+
+const KeyID Key = "id"
+
 func TestGetContextValue(t *testing.T) {
 	must := must.New(t)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req = req.WithContext(context.WithValue(req.Context(), "id", 1))
+	req = req.WithContext(context.WithValue(req.Context(), KeyID, 1))
 
-	id := GetContextValue(req, "id")
+	id := GetContextValue(req, KeyID)
 	must.Equal(1, id)
 
 	slug := GetContextValue(req, "slug")
