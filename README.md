@@ -50,3 +50,8 @@ func main() {
 
 # License
 This project is licensed under the [Mozilla Public License 2.0](https://github.com/ngamux/ngamux/blob/master/LICENSE).
+
+# Contributors
+Thanks to all contributors!
+
+[![Contributors](https://contrib.rocks/image?repo=ngamux/ngamux)](https://github.com/ngamux/ngamux/graphs/contributors)
