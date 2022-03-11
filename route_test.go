@@ -49,7 +49,8 @@ func TestGetRoute(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	handler, req := mux.getRoute(req)
-	handler.Handler(rec, req)
+	err := handler.Handler(rec, req)
+	must.Nil(err)
 
 	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
 	expected := "ok"
@@ -63,7 +64,8 @@ func TestGetRoute(t *testing.T) {
 	req1 := httptest.NewRequest(http.MethodGet, "/123", nil)
 	rec1 := httptest.NewRecorder()
 	handler1, req1 := mux1.getRoute(req1)
-	handler1.Handler(rec1, req1)
+	err = handler1.Handler(rec1, req1)
+	must.Nil(err)
 
 	result = strings.ReplaceAll(rec1.Body.String(), "\n", "")
 	expected = "ok"
@@ -72,7 +74,8 @@ func TestGetRoute(t *testing.T) {
 	req2 := httptest.NewRequest(http.MethodGet, "/123", nil)
 	rec2 := httptest.NewRecorder()
 	handler2, req2 := mux.getRoute(req2)
-	handler2.Handler(rec2, req2)
+	err = handler2.Handler(rec2, req2)
+	must.Nil(err)
 
 	result = strings.ReplaceAll(rec2.Body.String(), "\n", "")
 	expected = "not found"
@@ -81,7 +84,8 @@ func TestGetRoute(t *testing.T) {
 	req3 := httptest.NewRequest(http.MethodPost, "/", nil)
 	rec3 := httptest.NewRecorder()
 	handler2, req3 = mux.getRoute(req3)
-	handler2.Handler(rec3, req3)
+	err = handler2.Handler(rec3, req3)
+	must.Nil(err)
 
 	result = strings.ReplaceAll(rec3.Body.String(), "\n", "")
 	expected = "method not allowed"

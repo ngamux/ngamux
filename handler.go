@@ -12,5 +12,5 @@ type (
 
 // ServeHTTP same as original Handler but for built in HTTP HandlerFunc
 func (h Handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	h(rw, r)
+	_ = h(rw, r)
 }
