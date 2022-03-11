@@ -99,7 +99,8 @@ func TestString(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		String(rw, "ok")
+		err := String(rw, "ok")
+		must.Nil(err)
 	})
 	handler.ServeHTTP(rec, req)
 
@@ -113,7 +114,8 @@ func TestStringWithStatus(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		StringWithStatus(rw, http.StatusOK, "ok")
+		err := StringWithStatus(rw, http.StatusOK, "ok")
+		must.Nil(err)
 	})
 	handler.ServeHTTP(rec, req)
 

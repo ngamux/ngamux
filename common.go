@@ -80,7 +80,11 @@ func GetFormFile(r *http.Request, key string, maxFileSize ...int64) (*multipart.
 		maxFileSizeParsed = maxFileSize[0]
 	}
 
-	r.ParseMultipartForm(maxFileSizeParsed)
+	err := r.ParseMultipartForm(maxFileSizeParsed)
+	if err != nil {
+		return nil, err
+	}
+
 	file, header, err := r.FormFile(key)
 	if err != nil {
 		return nil, err
@@ -118,8 +122,8 @@ func GetContextValue(r *http.Request, key interface{}) interface{} {
 // String write string data to response body
 func String(rw http.ResponseWriter, data string) error {
 	rw.Header().Add("content-type", "text/plain")
-	fmt.Fprintln(rw, data)
-	return nil
+	_, err := fmt.Fprintln(rw, data)
+	return err
 }
 
 // StringWithStatus write string data to response body with status code
