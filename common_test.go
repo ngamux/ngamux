@@ -133,9 +133,10 @@ func TestJSON(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		JSON(rw, Map{
+		err := JSON(rw, Map{
 			"id": 1,
 		})
+		must.Nil(err)
 	})
 	handler.ServeHTTP(rec, req)
 
@@ -149,9 +150,10 @@ func TestJSONWithStatus(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		JSONWithStatus(rw, http.StatusOK, Map{
+		err := JSONWithStatus(rw, http.StatusOK, Map{
 			"id": 1,
 		})
+		must.Nil(err)
 	})
 	handler.ServeHTTP(rec, req)
 

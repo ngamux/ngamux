@@ -128,7 +128,7 @@ func String(rw http.ResponseWriter, data string) error {
 
 // StringWithStatus write string data to response body with status code
 func StringWithStatus(rw http.ResponseWriter, status int, data string) error {
-	String(rw, data)
+	_ = String(rw, data)
 	rw.WriteHeader(status)
 	return nil
 }
