@@ -106,3 +106,21 @@ func TestGetRoute(t *testing.T) {
 		t.Errorf("TestGetRoute need %v, but got %v", expected, result)
 	}
 }
+
+func BenchmarkRouter(b *testing.B) {
+	mux := NewNgamux()
+	defaultHandler := func(rw http.ResponseWriter, r *http.Request) error {
+		return nil
+	}
+	b.Run("add route", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			mux.addRoute(buildRoute("/", http.MethodGet, defaultHandler))
+		}
+	})
+
+	b.Run("get route", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			mux.getRoute(httptest.NewRequest(http.MethodGet, "/", nil))
+		}
+	})
+}
