@@ -9,12 +9,13 @@ import (
 )
 
 type (
+	// Route describe a route object
 	Route struct {
 		Path       string
 		Method     string
 		Handler    Handler
 		Params     [][]string
-		UrlMatcher *regexp.Regexp
+		URLMatcher *regexp.Regexp
 	}
 
 	routeMap map[string]map[string]Route
@@ -56,7 +57,7 @@ func (mux *Ngamux) addRoute(route Route) {
 	pathWithParams = mux.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z\\.\\-_]+)")
 	route.Path = pathWithParams
 
-	route.UrlMatcher, err = regexp.Compile("^" + pathWithParams + "$")
+	route.URLMatcher, err = regexp.Compile("^" + pathWithParams + "$")
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -68,12 +69,12 @@ func (mux *Ngamux) addRoute(route Route) {
 	mux.routesParam[route.Path][route.Method] = route
 }
 
-func buildUrlParams(r *http.Request, route Route, path string) (*http.Request, Route) {
-	if route.UrlMatcher == nil {
+func buildURLParams(r *http.Request, route Route, path string) (*http.Request, Route) {
+	if route.URLMatcher == nil {
 		return r, route
 	}
 
-	foundParams := route.UrlMatcher.FindAllStringSubmatch(path, -1)
+	foundParams := route.URLMatcher.FindAllStringSubmatch(path, -1)
 	params := make([][]string, len(route.Params))
 	copy(params, route.Params)
 	for i := range params {
@@ -96,12 +97,12 @@ func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
 	foundRouteMap, ok := mux.routes[path]
 	if !ok {
 		for url, route := range mux.routesParam {
-			urlMatcher, err := regexp.Compile("^" + url + "$")
+			URLMatcher, err := regexp.Compile("^" + url + "$")
 			if err != nil {
 				break
 			}
 
-			if urlMatcher.MatchString(path) {
+			if URLMatcher.MatchString(path) {
 				foundRouteMap = route
 				break
 			}
@@ -123,7 +124,7 @@ func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
 			r = SetContextValue(r, "error", ErrorMethodNotAllowed)
 			foundRoute.Handler = mux.config.GlobalErrorHandler
 		} else {
-			r, route = buildUrlParams(r, route, path)
+			r, route = buildURLParams(r, route, path)
 			foundRoute = route
 		}
 	}

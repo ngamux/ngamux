@@ -1,5 +1,6 @@
 package ngamux
 
+// Config define ngamux global configuration
 type Config struct {
 	RemoveTrailingSlash bool
 	GlobalErrorHandler  Handler

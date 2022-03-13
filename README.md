@@ -5,6 +5,7 @@ Simple HTTP router for Go
 [![Go Version](https://img.shields.io/github/go-mod/go-version/ngamux/ngamux.svg)](https://github.com/ngamux/ngamux)
 [![GoDoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/ngamux/ngamux)
 [![GoReportCard](https://goreportcard.com/badge/github.com/ngamux/ngamux)](https://goreportcard.com/report/github.com/ngamux/ngamux)
+[![Coverage Status](https://coveralls.io/repos/github/ngamux/ngamux/badge.svg?branch=master)](https://coveralls.io/github/ngamux/ngamux?branch=master)
 
 ---
 
@@ -42,6 +43,8 @@ func main() {
 }
 ```
 
+See more [examples](https://github.com/ngamux/ngamux-example)!
+
 # Provided Middlewares
 * [CORS](https://github.com/ngamux/middleware/tree/master/cors)
 * [Recover](https://github.com/ngamux/middleware/tree/master/recover)
@@ -49,3 +52,8 @@ func main() {
 
 # License
 This project is licensed under the [Mozilla Public License 2.0](https://github.com/ngamux/ngamux/blob/master/LICENSE).
+
+# Contributors
+Thanks to all contributors!
+
+[![Contributors](https://contrib.rocks/image?repo=ngamux/ngamux)](https://github.com/ngamux/ngamux/graphs/contributors)

@@ -4,6 +4,7 @@ import (
 	"path"
 )
 
+// Group returns new nested ngamux object
 func (mux *Ngamux) Group(url string, middlewares ...MiddlewareFunc) *Ngamux {
 	if mux.parent != nil {
 		panic("nested route group is not supported yet")

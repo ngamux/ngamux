@@ -7,13 +7,16 @@ import (
 	"regexp"
 )
 
+// KeyContext describe key type for ngamux context
 type KeyContext int
 
 const (
+	// KeyContextParams is key context for url params
 	KeyContextParams KeyContext = 1 << iota
 )
 
 type (
+	// Ngamux describe structure of ngamux object
 	Ngamux struct {
 		parent            *Ngamux
 		path              string
@@ -29,7 +32,9 @@ var (
 	_ http.Handler = &Ngamux{}
 	_ http.Handler = Handler(func(rw http.ResponseWriter, r *http.Request) error { return nil })
 
-	ErrorNotFound         = errors.New("not found")
+	// ErrorNotFound is errors object when searching failure
+	ErrorNotFound = errors.New("not found")
+	// ErrorMethodNotAllowed is errors object when there access to invalid method
 	ErrorMethodNotAllowed = errors.New("method not allowed")
 
 	paramsFinder       = regexp.MustCompile("(:[a-zA-Z]+[0-9a-zA-Z]*)")
@@ -46,6 +51,7 @@ var (
 	}
 )
 
+// NewNgamux returns new ngamux object
 func NewNgamux(configs ...Config) *Ngamux {
 	config := buildConfig(configs...)
 	routesMap := routeMap{}
@@ -60,16 +66,23 @@ func NewNgamux(configs ...Config) *Ngamux {
 	return router
 }
 
+// ServeHTTP run ngamux router matcher
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, r := mux.getRoute(r)
-	route.Handler(rw, r)
+	err := route.Handler(rw, r)
+	if err != nil {
+		rw.WriteHeader(500)
+		_, _ = rw.Write([]byte(err.Error()))
+	}
 }
 
+// Use register global middleware
 func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
 	mux.middlewares = append(mux.middlewares, middlewares...)
 	mux.config.GlobalErrorHandler = WithMiddlewares(mux.middlewares...)(mux.config.GlobalErrorHandler)
 }
 
+// Get register route for a url with Get request method
 func (mux *Ngamux) Get(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodGet, handler))
@@ -78,6 +91,7 @@ func (mux *Ngamux) Get(url string, handler Handler) {
 	mux.addRoute(buildRoute(url, http.MethodGet, handler, mux.middlewares...))
 }
 
+// Post register route for a url with Post request method
 func (mux *Ngamux) Post(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodPost, handler))
@@ -86,6 +100,7 @@ func (mux *Ngamux) Post(url string, handler Handler) {
 	mux.addRoute(buildRoute(url, http.MethodPost, handler, mux.middlewares...))
 }
 
+// Patch register route for a url with Patch request method
 func (mux *Ngamux) Patch(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodPatch, handler))
@@ -94,6 +109,7 @@ func (mux *Ngamux) Patch(url string, handler Handler) {
 	mux.addRoute(buildRoute(url, http.MethodPatch, handler, mux.middlewares...))
 }
 
+// Put register route for a url with Put request method
 func (mux *Ngamux) Put(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodPut, handler))
@@ -102,6 +118,7 @@ func (mux *Ngamux) Put(url string, handler Handler) {
 	mux.addRoute(buildRoute(url, http.MethodPut, handler, mux.middlewares...))
 }
 
+// Delete register route for a url with Delete request method
 func (mux *Ngamux) Delete(url string, handler Handler) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodDelete, handler))
@@ -110,6 +127,7 @@ func (mux *Ngamux) Delete(url string, handler Handler) {
 	mux.addRoute(buildRoute(url, http.MethodDelete, handler, mux.middlewares...))
 }
 
+// All register route for a url with any request method
 func (mux *Ngamux) All(url string, handler Handler) {
 	for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
 		if mux.parent != nil {

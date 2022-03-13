@@ -9,10 +9,13 @@ import (
 )
 
 type (
+	// Map is key value type to store any data
 	Map map[string]interface{}
 )
 
 // SETUP
+
+// WithMiddlewares returns single middleware from multiple middleware
 func WithMiddlewares(middleware ...MiddlewareFunc) MiddlewareFunc {
 	return func(next Handler) Handler {
 		h := next
@@ -31,6 +34,8 @@ func WithMiddlewares(middleware ...MiddlewareFunc) MiddlewareFunc {
 }
 
 // REQUEST
+
+// GetParam returns parameter from url using a key
 func GetParam(r *http.Request, key string) string {
 	params := r.Context().Value(KeyContextParams).([][]string)
 	for _, param := range params {
@@ -42,6 +47,7 @@ func GetParam(r *http.Request, key string) string {
 	return ""
 }
 
+// GetQuery returns data from query params using a key
 func GetQuery(r *http.Request, key string, fallback ...string) string {
 	queries := r.URL.Query()
 	query := queries.Get(key)
@@ -54,6 +60,7 @@ func GetQuery(r *http.Request, key string, fallback ...string) string {
 	return query
 }
 
+// GetFormValue returns data from form using a key
 func GetFormValue(r *http.Request, key string, fallback ...string) string {
 	value := r.PostFormValue(key)
 	if value == "" {
@@ -66,13 +73,18 @@ func GetFormValue(r *http.Request, key string, fallback ...string) string {
 	return value
 }
 
+// GetFormFile returns file from form using a key
 func GetFormFile(r *http.Request, key string, maxFileSize ...int64) (*multipart.FileHeader, error) {
 	var maxFileSizeParsed int64 = 10 << 20
 	if len(maxFileSize) > 0 {
 		maxFileSizeParsed = maxFileSize[0]
 	}
 
-	r.ParseMultipartForm(maxFileSizeParsed)
+	err := r.ParseMultipartForm(maxFileSizeParsed)
+	if err != nil {
+		return nil, err
+	}
+
 	file, header, err := r.FormFile(key)
 	if err != nil {
 		return nil, err
@@ -82,6 +94,7 @@ func GetFormFile(r *http.Request, key string, maxFileSize ...int64) (*multipart.
 	return header, nil
 }
 
+// GetJSON get json data from requst body and store to variable reference
 func GetJSON(r *http.Request, store interface{}) error {
 	if err := json.NewDecoder(r.Body).Decode(&store); err != nil {
 		return err
@@ -90,6 +103,7 @@ func GetJSON(r *http.Request, store interface{}) error {
 	return nil
 }
 
+// SetContextValue returns http request object with new context that contains value
 func SetContextValue(r *http.Request, key interface{}, value interface{}) *http.Request {
 	ctx := r.Context()
 	ctx = context.WithValue(ctx, key, value)
@@ -97,24 +111,29 @@ func SetContextValue(r *http.Request, key interface{}, value interface{}) *http.
 	return r
 }
 
+// GetContextValue returns value from http request context
 func GetContextValue(r *http.Request, key interface{}) interface{} {
 	value := r.Context().Value(key)
 	return value
 }
 
 // RESPONSE
+
+// String write string data to response body
 func String(rw http.ResponseWriter, data string) error {
 	rw.Header().Add("content-type", "text/plain")
-	fmt.Fprintln(rw, data)
-	return nil
+	_, err := fmt.Fprintln(rw, data)
+	return err
 }
 
+// StringWithStatus write string data to response body with status code
 func StringWithStatus(rw http.ResponseWriter, status int, data string) error {
-	String(rw, data)
+	_ = String(rw, data)
 	rw.WriteHeader(status)
 	return nil
 }
 
+// JSON write JSON data to response
 func JSON(rw http.ResponseWriter, data interface{}) error {
 	rw.Header().Add("content-type", "application/json")
 	if err := json.NewEncoder(rw).Encode(data); err != nil {
@@ -124,6 +143,7 @@ func JSON(rw http.ResponseWriter, data interface{}) error {
 	return nil
 }
 
+// JSONWithStatus write JSON data to response body with status code
 func JSONWithStatus(rw http.ResponseWriter, status int, data interface{}) error {
 	rw.Header().Add("content-type", "application/json")
 	rw.WriteHeader(status)

@@ -5,9 +5,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/golang-must/must"
 )
 
 func TestServeHTTP(t *testing.T) {
+	must := must.New(t)
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/a", nil)
 	handler := Handler(func(rw http.ResponseWriter, r *http.Request) error {
@@ -17,8 +20,5 @@ func TestServeHTTP(t *testing.T) {
 
 	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
 	expected := "ok"
-
-	if result != expected {
-		t.Errorf("TestServeHTTP need %v, but got %v", expected, result)
-	}
+	must.Equal(expected, result)
 }
