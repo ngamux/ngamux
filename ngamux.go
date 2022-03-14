@@ -51,8 +51,8 @@ var (
 	}
 )
 
-// NewNgamux returns new ngamux object
-func NewNgamux(configs ...Config) *Ngamux {
+// New returns new ngamux object
+func New(configs ...Config) *Ngamux {
 	config := buildConfig(configs...)
 	routesMap := routeMap{}
 	routesParamMap := routeMap{}

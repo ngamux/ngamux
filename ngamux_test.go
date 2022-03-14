@@ -12,7 +12,7 @@ import (
 
 func TestNewNgamux(t *testing.T) {
 	must := must.New(t)
-	result := NewNgamux()
+	result := New()
 	expected := &Ngamux{
 		routes:            routeMap{},
 		routesParam:       routeMap{},
@@ -28,7 +28,7 @@ func TestNewNgamux(t *testing.T) {
 
 func TestUse(t *testing.T) {
 	must := must.New(t)
-	mux := NewNgamux()
+	mux := New()
 	middleware := func(next Handler) Handler {
 		return func(rw http.ResponseWriter, r *http.Request) error {
 			return nil
@@ -46,7 +46,7 @@ func TestUse(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	must := must.New(t)
-	mux := NewNgamux()
+	mux := New()
 	mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
 	})
@@ -62,7 +62,7 @@ func TestGet(t *testing.T) {
 
 func TestPost(t *testing.T) {
 	must := must.New(t)
-	mux := NewNgamux()
+	mux := New()
 	mux.Post("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
 	})
@@ -78,7 +78,7 @@ func TestPost(t *testing.T) {
 
 func TestPut(t *testing.T) {
 	must := must.New(t)
-	mux := NewNgamux()
+	mux := New()
 	mux.Put("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
 	})
@@ -94,7 +94,7 @@ func TestPut(t *testing.T) {
 
 func TestPatch(t *testing.T) {
 	must := must.New(t)
-	mux := NewNgamux()
+	mux := New()
 	mux.Patch("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
 	})
@@ -110,7 +110,7 @@ func TestPatch(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	must := must.New(t)
-	mux := NewNgamux()
+	mux := New()
 	mux.Delete("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
 	})
@@ -126,7 +126,7 @@ func TestDelete(t *testing.T) {
 
 func TestAll(t *testing.T) {
 	must := must.New(t)
-	mux := NewNgamux()
+	mux := New()
 	mux.All("/", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
 	})
@@ -145,7 +145,7 @@ func TestAll(t *testing.T) {
 
 func TestErrorResponse(t *testing.T) {
 	must := must.New(t)
-	mux := NewNgamux()
+	mux := New()
 	mux.Get("/error-method", func(rw http.ResponseWriter, r *http.Request) error {
 		return errors.New("something bad")
 	})

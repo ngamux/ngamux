@@ -11,7 +11,7 @@ import (
 
 func TestGroup(t *testing.T) {
 	must := must.New(t)
-	mux := NewNgamux()
+	mux := New()
 	a := mux.Group("/a")
 	a.Get("", func(rw http.ResponseWriter, r *http.Request) error {
 		return String(rw, "ok")
