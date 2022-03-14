@@ -49,6 +49,8 @@ See more [examples](https://github.com/ngamux/ngamux-example)!
 * [CORS](https://github.com/ngamux/middleware/tree/master/cors)
 * [Recover](https://github.com/ngamux/middleware/tree/master/recover)
 * [Static](https://github.com/ngamux/middleware/tree/master/static)
+* [File Upload](https://github.com/ngamux/middleware/tree/master/fileupload)
+* [Log](https://github.com/ngamux/middleware/tree/master/log)
 
 # License
 This project is licensed under the [Mozilla Public License 2.0](https://github.com/ngamux/ngamux/blob/master/LICENSE).
