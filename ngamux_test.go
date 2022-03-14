@@ -16,7 +16,7 @@ func TestNewNgamux(t *testing.T) {
 	expected := &Ngamux{
 		routes:            routeMap{},
 		routesParam:       routeMap{},
-		config:            buildConfig(),
+		config:            NewConfig(),
 		regexpParamFinded: paramsFinder,
 	}
 

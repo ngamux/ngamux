@@ -8,17 +8,10 @@ import (
 
 func TestBuildConfig(t *testing.T) {
 	must := must.New(t)
-	result := buildConfig()
+	result := NewConfig()
 	expected := Config{
 		RemoveTrailingSlash: true,
-	}
-	must.Equal(expected.RemoveTrailingSlash, result.RemoveTrailingSlash)
-
-	result = buildConfig(Config{
-		RemoveTrailingSlash: false,
-	})
-	expected = Config{
-		RemoveTrailingSlash: false,
+		GlobalErrorHandler:  globalErrorHandler,
 	}
 	must.Equal(expected.RemoveTrailingSlash, result.RemoveTrailingSlash)
 }

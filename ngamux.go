@@ -52,8 +52,12 @@ var (
 )
 
 // New returns new ngamux object
-func New(configs ...Config) *Ngamux {
-	config := buildConfig(configs...)
+func New(opts ...func(*Config)) *Ngamux {
+	config := NewConfig()
+	for _, opt := range opts {
+		opt(&config)
+	}
+
 	routesMap := routeMap{}
 	routesParamMap := routeMap{}
 	router := &Ngamux{
