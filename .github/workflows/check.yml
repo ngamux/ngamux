@@ -37,8 +37,6 @@ jobs:
 
       - name: Test
         run: go test -v ./... -cover
-      
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.COVERALLS_GITHUB_TOKEN }}
+
+      - name: Coverage
+        uses: codecov/codecov-action@v2
