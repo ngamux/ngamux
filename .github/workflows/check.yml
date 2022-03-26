@@ -1,10 +1,10 @@
 name: Lint and Test
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
+  push:
+    branches:
+      - master
 
 jobs:
 
@@ -19,10 +19,12 @@ jobs:
       - name: Check out into the root
         uses: actions/checkout@v2
 
-      - name: Lint
+      - name: Run Lint
         uses: golangci/golangci-lint-action@v2
         with:
           version: latest
+      - name: Run Vet
+        run: go vet
 
   test:
     runs-on: ubuntu-latest
