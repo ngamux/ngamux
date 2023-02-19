@@ -32,11 +32,6 @@ var (
 	_ http.Handler = &Ngamux{}
 	_ http.Handler = Handler(func(rw http.ResponseWriter, r *http.Request) error { return nil })
 
-	// ErrorNotFound is errors object when searching failure
-	ErrorNotFound = errors.New("not found")
-	// ErrorMethodNotAllowed is errors object when there access to invalid method
-	ErrorMethodNotAllowed = errors.New("method not allowed")
-
 	paramsFinder       = regexp.MustCompile("(:[a-zA-Z]+[0-9a-zA-Z]*)")
 	globalErrorHandler = func(rw http.ResponseWriter, r *http.Request) error {
 		err := GetContextValue(r, "error").(error)
@@ -49,6 +44,20 @@ var (
 		fmt.Fprintln(rw, err)
 		return nil
 	}
+
+	allMethods = []string{
+		http.MethodGet,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodPatch,
+		http.MethodDelete,
+	}
+
+	// ErrorNotFound is errors object when searching failure
+	ErrorNotFound = errors.New("not found")
+
+	// ErrorMethodNotAllowed is errors object when there access to invalid method
+	ErrorMethodNotAllowed = errors.New("method not allowed")
 )
 
 // New returns new ngamux object
@@ -133,7 +142,7 @@ func (mux *Ngamux) Delete(url string, handler Handler) {
 
 // All register route for a url with any request method
 func (mux *Ngamux) All(url string, handler Handler) {
-	for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
+	for _, method := range allMethods {
 		if mux.parent != nil {
 			mux.addRouteFromGroup(buildRoute(url, method, handler))
 			return
