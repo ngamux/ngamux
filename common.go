@@ -10,7 +10,7 @@ import (
 
 type (
 	// Map is key value type to store any data
-	Map map[string]interface{}
+	Map map[string]any
 )
 
 // SETUP
@@ -95,7 +95,7 @@ func GetFormFile(r *http.Request, key string, maxFileSize ...int64) (*multipart.
 }
 
 // GetJSON get json data from requst body and store to variable reference
-func GetJSON(r *http.Request, store interface{}) error {
+func GetJSON(r *http.Request, store any) error {
 	if err := json.NewDecoder(r.Body).Decode(&store); err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func GetJSON(r *http.Request, store interface{}) error {
 }
 
 // SetContextValue returns http request object with new context that contains value
-func SetContextValue(r *http.Request, key interface{}, value interface{}) *http.Request {
+func SetContextValue(r *http.Request, key any, value any) *http.Request {
 	ctx := r.Context()
 	ctx = context.WithValue(ctx, key, value)
 	r = r.WithContext(ctx)
@@ -112,7 +112,7 @@ func SetContextValue(r *http.Request, key interface{}, value interface{}) *http.
 }
 
 // GetContextValue returns value from http request context
-func GetContextValue(r *http.Request, key interface{}) interface{} {
+func GetContextValue(r *http.Request, key any) any {
 	value := r.Context().Value(key)
 	return value
 }
@@ -134,7 +134,7 @@ func StringWithStatus(rw http.ResponseWriter, status int, data string) error {
 }
 
 // JSON write JSON data to response
-func JSON(rw http.ResponseWriter, data interface{}) error {
+func JSON(rw http.ResponseWriter, data any) error {
 	rw.Header().Add("content-type", "application/json")
 	if err := json.NewEncoder(rw).Encode(data); err != nil {
 		return err
@@ -144,7 +144,7 @@ func JSON(rw http.ResponseWriter, data interface{}) error {
 }
 
 // JSONWithStatus write JSON data to response body with status code
-func JSONWithStatus(rw http.ResponseWriter, status int, data interface{}) error {
+func JSONWithStatus(rw http.ResponseWriter, status int, data any) error {
 	rw.Header().Add("content-type", "application/json")
 	rw.WriteHeader(status)
 	if err := json.NewEncoder(rw).Encode(data); err != nil {

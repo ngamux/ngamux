@@ -56,7 +56,7 @@ func TestGetJSON(t *testing.T) {
 	input := strings.NewReader(`{"id": 1}`)
 	req := httptest.NewRequest(http.MethodGet, "/", input)
 
-	var data map[string]interface{}
+	var data map[string]any
 	err := GetJSON(req, &data)
 	must.Nil(err)
 	must.NotNil(data["id"])
