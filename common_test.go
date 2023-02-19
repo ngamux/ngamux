@@ -66,6 +66,17 @@ func TestGetJSON(t *testing.T) {
 	must.Equal(float64(1), id)
 }
 
+func TestGetFormValue(t *testing.T) {
+
+	t.Run("can supply default value", func(t *testing.T) {
+		must := must.New(t)
+
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(""))
+		result := GetFormValue(req, "idontknow", "1")
+		must.Equal("1", result)
+	})
+}
+
 func TestSetContextValue(t *testing.T) {
 	must := must.New(t)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
