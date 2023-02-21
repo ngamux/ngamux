@@ -151,3 +151,13 @@ func (mux *Ngamux) All(url string, handler Handler) {
 		mux.addRoute(buildRoute(url, method, handler, mux.middlewares...))
 	}
 }
+
+// With register middlewares and returns router
+func (mux *Ngamux) With(middlewares ...MiddlewareFunc) *Ngamux {
+	group := &Ngamux{
+		parent:      mux,
+		path:        mux.path,
+		middlewares: middlewares,
+	}
+	return group
+}
