@@ -48,7 +48,7 @@ func TestGet(t *testing.T) {
 	must := must.New(t)
 	mux := New()
 	mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return String(rw, "ok")
+		return Res(rw).String("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -64,7 +64,7 @@ func TestPost(t *testing.T) {
 	must := must.New(t)
 	mux := New()
 	mux.Post("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return String(rw, "ok")
+		return Res(rw).String("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -80,7 +80,7 @@ func TestPut(t *testing.T) {
 	must := must.New(t)
 	mux := New()
 	mux.Put("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return String(rw, "ok")
+		return Res(rw).String("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -96,7 +96,7 @@ func TestPatch(t *testing.T) {
 	must := must.New(t)
 	mux := New()
 	mux.Patch("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return String(rw, "ok")
+		return Res(rw).String("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -112,7 +112,7 @@ func TestDelete(t *testing.T) {
 	must := must.New(t)
 	mux := New()
 	mux.Delete("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return String(rw, "ok")
+		return Res(rw).String("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -128,7 +128,7 @@ func TestAll(t *testing.T) {
 	must := must.New(t)
 	mux := New()
 	mux.All("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return String(rw, "ok")
+		return Res(rw).String("ok")
 	})
 
 	methods := []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete}

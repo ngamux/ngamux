@@ -105,74 +105,74 @@ func TestGetContextValue(t *testing.T) {
 	must.Nil(slug)
 }
 
-func TestString(t *testing.T) {
-	must := must.New(t)
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		err := String(rw, "ok")
-		must.Nil(err)
-	})
-	handler.ServeHTTP(rec, req)
+// func TestString(t *testing.T) {
+// 	must := must.New(t)
+// 	req := httptest.NewRequest(http.MethodGet, "/", nil)
+// 	rec := httptest.NewRecorder()
+// 	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+// 		err := String(rw, "ok")
+// 		must.Nil(err)
+// 	})
+// 	handler.ServeHTTP(rec, req)
 
-	result := rec.Body.String()
-	expected := "ok\n"
-	must.Equal(expected, result)
-}
+// 	result := rec.Body.String()
+// 	expected := "ok\n"
+// 	must.Equal(expected, result)
+// }
 
-func TestStringWithStatus(t *testing.T) {
-	must := must.New(t)
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		err := StringWithStatus(rw, http.StatusOK, "ok")
-		must.Nil(err)
-	})
-	handler.ServeHTTP(rec, req)
+// func TestStringWithStatus(t *testing.T) {
+// 	must := must.New(t)
+// 	req := httptest.NewRequest(http.MethodGet, "/", nil)
+// 	rec := httptest.NewRecorder()
+// 	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+// 		err := StringWithStatus(rw, http.StatusOK, "ok")
+// 		must.Nil(err)
+// 	})
+// 	handler.ServeHTTP(rec, req)
 
-	resultBody := rec.Body.String()
-	expectedBody := "ok\n"
-	must.Equal(expectedBody, resultBody)
+// 	resultBody := rec.Body.String()
+// 	expectedBody := "ok\n"
+// 	must.Equal(expectedBody, resultBody)
 
-	resultStatus := rec.Result().StatusCode
-	expectedStatus := http.StatusOK
-	must.Equal(expectedStatus, resultStatus)
-}
+// 	resultStatus := rec.Result().StatusCode
+// 	expectedStatus := http.StatusOK
+// 	must.Equal(expectedStatus, resultStatus)
+// }
 
-func TestJSON(t *testing.T) {
-	must := must.New(t)
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		err := JSON(rw, Map{
-			"id": 1,
-		})
-		must.Nil(err)
-	})
-	handler.ServeHTTP(rec, req)
+// func TestJSON(t *testing.T) {
+// 	must := must.New(t)
+// 	req := httptest.NewRequest(http.MethodGet, "/", nil)
+// 	rec := httptest.NewRecorder()
+// 	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+// 		err := JSON(rw, Map{
+// 			"id": 1,
+// 		})
+// 		must.Nil(err)
+// 	})
+// 	handler.ServeHTTP(rec, req)
 
-	resultBody := strings.ReplaceAll(rec.Body.String(), "\n", "")
-	expectedBody := `{"id":1}`
-	must.Equal(expectedBody, resultBody)
-}
+// 	resultBody := strings.ReplaceAll(rec.Body.String(), "\n", "")
+// 	expectedBody := `{"id":1}`
+// 	must.Equal(expectedBody, resultBody)
+// }
 
-func TestJSONWithStatus(t *testing.T) {
-	must := must.New(t)
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		err := JSONWithStatus(rw, http.StatusOK, Map{
-			"id": 1,
-		})
-		must.Nil(err)
-	})
-	handler.ServeHTTP(rec, req)
+// func TestJSONWithStatus(t *testing.T) {
+// 	must := must.New(t)
+// 	req := httptest.NewRequest(http.MethodGet, "/", nil)
+// 	rec := httptest.NewRecorder()
+// 	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+// 		err := JSONWithStatus(rw, http.StatusOK, Map{
+// 			"id": 1,
+// 		})
+// 		must.Nil(err)
+// 	})
+// 	handler.ServeHTTP(rec, req)
 
-	resultBody := strings.ReplaceAll(rec.Body.String(), "\n", "")
-	expectedBody := `{"id":1}`
-	must.Equal(expectedBody, resultBody)
+// 	resultBody := strings.ReplaceAll(rec.Body.String(), "\n", "")
+// 	expectedBody := `{"id":1}`
+// 	must.Equal(expectedBody, resultBody)
 
-	resultStatus := rec.Result().StatusCode
-	expectedStatus := http.StatusOK
-	must.Equal(expectedStatus, resultStatus)
-}
+// 	resultStatus := rec.Result().StatusCode
+// 	expectedStatus := http.StatusOK
+// 	must.Equal(expectedStatus, resultStatus)
+// }

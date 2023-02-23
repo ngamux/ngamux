@@ -3,7 +3,6 @@ package ngamux
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"mime/multipart"
 	"net/http"
 )
@@ -115,41 +114,4 @@ func SetContextValue(r *http.Request, key any, value any) *http.Request {
 func GetContextValue(r *http.Request, key any) any {
 	value := r.Context().Value(key)
 	return value
-}
-
-// RESPONSE
-
-// String write string data to response body
-func String(rw http.ResponseWriter, data string) error {
-	rw.Header().Add("content-type", "text/plain")
-	_, err := fmt.Fprintln(rw, data)
-	return err
-}
-
-// StringWithStatus write string data to response body with status code
-func StringWithStatus(rw http.ResponseWriter, status int, data string) error {
-	_ = String(rw, data)
-	rw.WriteHeader(status)
-	return nil
-}
-
-// JSON write JSON data to response
-func JSON(rw http.ResponseWriter, data any) error {
-	rw.Header().Add("content-type", "application/json")
-	if err := json.NewEncoder(rw).Encode(data); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// JSONWithStatus write JSON data to response body with status code
-func JSONWithStatus(rw http.ResponseWriter, status int, data any) error {
-	rw.Header().Add("content-type", "application/json")
-	rw.WriteHeader(status)
-	if err := json.NewEncoder(rw).Encode(data); err != nil {
-		return err
-	}
-
-	return nil
 }

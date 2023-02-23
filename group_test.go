@@ -14,7 +14,7 @@ func TestGroup(t *testing.T) {
 	mux := New()
 	a := mux.Group("/a")
 	a.Get("", func(rw http.ResponseWriter, r *http.Request) error {
-		return String(rw, "ok")
+		return Res(rw).String("ok")
 	})
 
 	rec := httptest.NewRecorder()
