@@ -13,3 +13,10 @@ func WithErrorHandler(globalErrorHandler Handler) func(*Config) {
 		c.GlobalErrorHandler = globalErrorHandler
 	}
 }
+
+// WithLogLevel returns function that adds GlobalErrorHandler into config
+func WithLogLevel(level LogLevel) func(*Config) {
+	return func(c *Config) {
+		c.LogLevel = level
+	}
+}
