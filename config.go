@@ -6,6 +6,7 @@ type Config struct {
 	GlobalErrorHandler  Handler
 }
 
+// NewConfig returns Config with some default values
 func NewConfig() Config {
 	config := Config{
 		RemoveTrailingSlash: true,

@@ -1,3 +1,10 @@
+// Ngamux is simple HTTP router for Go
+// Github Repository: https://github.com/ngamux/ngamux
+// Examples: https://github.com/ngamux/ngamux-example
+
+// Package ngamux is simple HTTP router for Go that compatible with net/http,
+// the standard library to serve HTTP. Designed to make everything goes
+// in simple way.
 package ngamux
 
 import (

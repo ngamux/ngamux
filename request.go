@@ -7,10 +7,12 @@ import (
 	"net/http"
 )
 
+// Request define single request manager
 type Request struct {
 	*http.Request
 }
 
+// Req needs *http.Request and returns *Request object
 func Req(r *http.Request) *Request {
 	return &Request{r}
 }
@@ -86,7 +88,7 @@ func (r Request) JSON(store any) error {
 // Locals needs key and optional value
 // It returns any if only key and no value given
 // It insert value to context if key and value is given
-func (r *Request) Locals(key string, value ...any) any {
+func (r *Request) Locals(key any, value ...any) any {
 	if len(value) <= 0 {
 		return r.Context().Value(key)
 	}

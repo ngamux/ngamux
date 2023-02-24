@@ -6,11 +6,13 @@ import (
 	"net/http"
 )
 
+// Response define single response manager
 type Response struct {
 	http.ResponseWriter
 	status int
 }
 
+// Res needs http.ResponseWriter and returns *Response object
 func Res(rw http.ResponseWriter) *Response {
 	return &Response{
 		ResponseWriter: rw,
