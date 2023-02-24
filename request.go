@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"mime/multipart"
 	"net/http"
+	"strings"
 )
 
 // Request define single request manager
@@ -94,4 +95,9 @@ func (r *Request) Locals(key any, value ...any) any {
 	}
 	r.Request = r.WithContext(context.WithValue(r.Context(), key, value[0]))
 	return nil
+}
+
+// IsLocalhost returns true if hostname is localhost or 127.0.0.1
+func (r *Request) IsLocalhost() bool {
+	return strings.Contains(r.Host, "localhost") || strings.Contains(r.Host, "127.0.0.1")
 }

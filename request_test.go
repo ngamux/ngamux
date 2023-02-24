@@ -99,3 +99,15 @@ func TestLocals(t *testing.T) {
 	slug := req.Locals("slug")
 	must.Nil(slug)
 }
+
+func TestIsLocalhost(t *testing.T) {
+	must := must.New(t)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+
+	result := Req(req).IsLocalhost()
+	must.False(result)
+
+	req.Host = "localhost"
+	result = Req(req).IsLocalhost()
+	must.True(result)
+}
