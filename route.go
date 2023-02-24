@@ -116,12 +116,16 @@ func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
 
 	var foundRoute Route
 	if len(foundRouteMap) <= 0 {
-		r = Req(r).SetContextValue("error", ErrorNotFound).Request
+		tmpR := Req(r)
+		tmpR.Locals("error", ErrorNotFound)
+		r = tmpR.Request
 		foundRoute.Handler = mux.config.GlobalErrorHandler
 	} else {
 		route, ok := foundRouteMap[r.Method]
 		if !ok {
-			r = Req(r).SetContextValue("error", ErrorMethodNotAllowed).Request
+			tmpR := Req(r)
+			tmpR.Locals("error", ErrorMethodNotAllowed)
+			r = tmpR.Request
 			foundRoute.Handler = mux.config.GlobalErrorHandler
 		} else {
 			r, route = buildURLParams(r, route, path)

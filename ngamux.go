@@ -34,7 +34,7 @@ var (
 
 	paramsFinder       = regexp.MustCompile("(:[a-zA-Z]+[0-9a-zA-Z]*)")
 	globalErrorHandler = func(rw http.ResponseWriter, r *http.Request) error {
-		err := Req(r).GetContextValue("error").(error)
+		err := Req(r).Locals("error").(error)
 		if errors.Is(err, ErrorNotFound) {
 			rw.WriteHeader(http.StatusNotFound)
 		} else if errors.Is(err, ErrorMethodNotAllowed) {
