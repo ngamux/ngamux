@@ -11,6 +11,7 @@ import (
 type (
 	// Route describe a route object
 	Route struct {
+		RawPath    string
 		Path       string
 		Method     string
 		Handler    Handler
@@ -25,6 +26,7 @@ func buildRoute(url string, method string, handler Handler, middlewares ...Middl
 	handler = WithMiddlewares(middlewares...)(handler)
 
 	return Route{
+		RawPath: url,
 		Path:    url,
 		Method:  method,
 		Handler: handler,
@@ -44,6 +46,7 @@ func (mux *Ngamux) addRoute(route Route) {
 		}
 
 		mux.routes[route.Path][route.Method] = route
+		mux.Log(LogLevelInfo, "[ROUTE] %s %s registered", route.Method, route.RawPath)
 		return
 	}
 
@@ -67,6 +70,7 @@ func (mux *Ngamux) addRoute(route Route) {
 		mux.routesParam[route.Path] = map[string]Route{}
 	}
 	mux.routesParam[route.Path][route.Method] = route
+	mux.Log(LogLevelInfo, "[ROUTE] %s %s registered", route.Method, route.RawPath)
 }
 
 func buildURLParams(r *http.Request, route Route, path string) (*http.Request, Route) {
