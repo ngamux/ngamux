@@ -21,7 +21,7 @@ func TestReq(t *testing.T) {
 	must.Equal(expected, result)
 }
 
-func TestGetParam(t *testing.T) {
+func TestParams(t *testing.T) {
 	must := must.New(t)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -33,7 +33,7 @@ func TestGetParam(t *testing.T) {
 	must.Equal("", result)
 }
 
-func TestGetQuery(t *testing.T) {
+func TestQuery(t *testing.T) {
 	must := must.New(t)
 	req := Req(httptest.NewRequest(http.MethodGet, "/?id=1", nil))
 	result := req.Query("id")
@@ -46,22 +46,35 @@ func TestGetQuery(t *testing.T) {
 	must.Equal("", result)
 }
 
-func TestGetJSON(t *testing.T) {
-	must := must.New(t)
-	input := strings.NewReader(`{"id": 1}`)
-	req := Req(httptest.NewRequest(http.MethodGet, "/?id=1", input))
+func TestJSON(t *testing.T) {
+	t.Run("positive", func(t *testing.T) {
+		must := must.New(t)
+		input := strings.NewReader(`{"id": 1}`)
+		req := Req(httptest.NewRequest(http.MethodGet, "/?id=1", input))
 
-	var data map[string]any
-	err := req.JSON(&data)
-	must.Nil(err)
-	must.NotNil(data["id"])
+		var data map[string]any
+		err := req.JSON(&data)
+		must.Nil(err)
+		must.NotNil(data["id"])
 
-	id, ok := data["id"].(float64)
-	must.True(ok)
-	must.Equal(float64(1), id)
+		id, ok := data["id"].(float64)
+		must.True(ok)
+		must.Equal(float64(1), id)
+	})
+
+	t.Run("negative", func(t *testing.T) {
+		must := must.New(t)
+		input := strings.NewReader(`id`)
+		req := Req(httptest.NewRequest(http.MethodGet, "/?id=1", input))
+
+		var data map[string]any
+		err := req.JSON(&data)
+		must.NotNil(err)
+		must.Nil(data)
+	})
 }
 
-func TestGetFormValue(t *testing.T) {
+func TestFormValue(t *testing.T) {
 
 	t.Run("can supply default value", func(t *testing.T) {
 		must := must.New(t)

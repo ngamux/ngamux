@@ -36,9 +36,6 @@ type (
 )
 
 var (
-	_ http.Handler = &Ngamux{}
-	_ http.Handler = Handler(func(rw http.ResponseWriter, r *http.Request) error { return nil })
-
 	paramsFinder       = regexp.MustCompile("(:[a-zA-Z]+[0-9a-zA-Z]*)")
 	globalErrorHandler = func(rw http.ResponseWriter, r *http.Request) error {
 		err := Req(r).Locals("error").(error)

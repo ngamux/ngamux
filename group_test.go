@@ -12,10 +12,16 @@ import (
 func TestGroup(t *testing.T) {
 	must := must.New(t)
 	mux := New()
-	a := mux.Group("/a")
-	a.Get("", func(rw http.ResponseWriter, r *http.Request) error {
+	handler := func(rw http.ResponseWriter, r *http.Request) error {
 		return Res(rw).String("ok")
-	})
+	}
+	a := mux.Group("/a")
+	a.Get("", handler)
+	a.Post("", handler)
+	a.Put("", handler)
+	a.Patch("", handler)
+	a.Delete("", handler)
+	a.All("", handler)
 
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/a", nil)

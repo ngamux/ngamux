@@ -164,3 +164,15 @@ func TestErrorResponse(t *testing.T) {
 	expectedStatus := 500
 	must.Equal(expectedStatus, resultStatus)
 }
+
+func TestWith(t *testing.T) {
+	must := must.New(t)
+	mux := New()
+	mux = mux.With(func(next Handler) Handler {
+		return func(rw http.ResponseWriter, r *http.Request) error {
+			return next(rw, r)
+		}
+	})
+	must.NotNil(mux)
+	must.NotNil(mux.parent)
+}
