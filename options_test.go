@@ -20,4 +20,12 @@ func TestWithTrailingSlash(t *testing.T) {
 		mux := New(WithErrorHandler(globalErrorHandler))
 		must.NotNil(mux.config.GlobalErrorHandler)
 	})
+
+	t.Run("can set logLevel to config.LogLevel", func(t *testing.T) {
+		must := must.New(t)
+
+		mux := New(WithLogLevel(LogLevelQuiet))
+		must.Equal(mux.config.LogLevel, LogLevelQuiet)
+	})
+
 }

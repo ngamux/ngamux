@@ -11,7 +11,9 @@ import (
 
 func TestGroup(t *testing.T) {
 	must := must.New(t)
-	mux := New()
+	mux := New(
+		WithLogLevel(LogLevelQuiet),
+	)
 	handler := func(rw http.ResponseWriter, r *http.Request) error {
 		return Res(rw).String("ok")
 	}
