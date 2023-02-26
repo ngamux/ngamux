@@ -86,11 +86,21 @@ func New(opts ...func(*Config)) *Ngamux {
 // ServeHTTP run ngamux router matcher
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, r := mux.getRoute(r)
-	err := route.Handler(rw, r)
-	if err != nil {
-		rw.WriteHeader(500)
-		_, _ = rw.Write([]byte(err.Error()))
+
+	if route.withBody {
+		err := route.Handler(rw, r)
+		if err != nil {
+			rw.WriteHeader(500)
+
+			rw.Write([]byte(err.Error()))
+		}
+	} else {
+		err := route.Handler(readOnlyResponseWriter{rw}, r)
+		if err != nil {
+			rw.WriteHeader(500)
+		}
 	}
+
 }
 
 // Use register global middleware
@@ -111,6 +121,15 @@ func (mux *Ngamux) Get(url string, handler Handler) {
 		return
 	}
 	mux.addRoute(buildRoute(url, http.MethodGet, handler, mux.middlewares...))
+}
+
+// Head register route for a url with Head request method
+func (mux *Ngamux) Head(url string, handler Handler) {
+	if mux.parent != nil {
+		mux.addRouteFromGroup(buildRoute(url, http.MethodHead, handler))
+		return
+	}
+	mux.addRoute(buildRoute(url, http.MethodHead, handler, mux.middlewares...))
 }
 
 // Post register route for a url with Post request method

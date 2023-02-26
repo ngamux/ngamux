@@ -17,6 +17,7 @@ type (
 		Handler    Handler
 		Params     [][]string
 		URLMatcher *regexp.Regexp
+		withBody   bool
 	}
 
 	routeMap map[string]map[string]Route
@@ -25,12 +26,19 @@ type (
 func buildRoute(url string, method string, handler Handler, middlewares ...MiddlewareFunc) Route {
 	handler = WithMiddlewares(middlewares...)(handler)
 
-	return Route{
-		RawPath: url,
-		Path:    url,
-		Method:  method,
-		Handler: handler,
+	route := Route{
+		RawPath:  url,
+		Path:     url,
+		Method:   method,
+		Handler:  handler,
+		withBody: true,
 	}
+
+	if method == http.MethodHead {
+		route.withBody = false
+	}
+
+	return route
 }
 
 func (mux *Ngamux) addRoute(route Route) {

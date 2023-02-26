@@ -77,6 +77,24 @@ func TestGet(t *testing.T) {
 	must.Equal(expected, result)
 }
 
+func TestHead(t *testing.T) {
+	must := must.New(t)
+	mux := New(
+		WithLogLevel(LogLevelQuiet),
+	)
+	mux.Head("/", func(rw http.ResponseWriter, r *http.Request) error {
+		return Res(rw).String("ok")
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodHead, "/", nil)
+	mux.ServeHTTP(rec, req)
+
+	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+	expected := ""
+	must.Equal(expected, result)
+}
+
 func TestPost(t *testing.T) {
 	must := must.New(t)
 	mux := New(
