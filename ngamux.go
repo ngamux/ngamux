@@ -99,6 +99,11 @@ func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
 	mux.config.GlobalErrorHandler = WithMiddlewares(mux.middlewares...)(mux.config.GlobalErrorHandler)
 }
 
+// Config returns registered config (read only)
+func (mux Ngamux) Config() Config {
+	return mux.config
+}
+
 // Get register route for a url with Get request method
 func (mux *Ngamux) Get(url string, handler Handler) {
 	if mux.parent != nil {

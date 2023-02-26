@@ -48,6 +48,17 @@ func TestUse(t *testing.T) {
 	must.Equal(expected, result)
 }
 
+func TestConfig(t *testing.T) {
+	must := must.New(t)
+	mux := New(
+		WithLogLevel(LogLevelQuiet),
+	)
+
+	result := mux.Config()
+	must.Equal(result.RemoveTrailingSlash, true)
+	must.Equal(result.LogLevel, LogLevelQuiet)
+}
+
 func TestGet(t *testing.T) {
 	must := must.New(t)
 	mux := New(
