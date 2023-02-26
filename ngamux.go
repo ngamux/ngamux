@@ -92,7 +92,7 @@ func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			rw.WriteHeader(500)
 
-			rw.Write([]byte(err.Error()))
+			_, _ = rw.Write([]byte(err.Error()))
 		}
 	} else {
 		err := route.Handler(readOnlyResponseWriter{rw}, r)
