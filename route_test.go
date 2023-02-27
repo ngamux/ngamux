@@ -22,7 +22,7 @@ func TestBuildRoute(t *testing.T) {
 
 func TestAddRoute(t *testing.T) {
 	must := must.New(t)
-	mux := New()
+	mux := New(WithLogLevel(LogLevelQuiet))
 	mux.addRoute(buildRoute("/", http.MethodGet, nil))
 	mux.addRoute(buildRoute("/a", http.MethodGet, nil))
 	mux.addRoute(buildRoute("/b", http.MethodGet, nil))
@@ -30,7 +30,7 @@ func TestAddRoute(t *testing.T) {
 	expected := 3
 	must.Equal(expected, result)
 
-	mux = New()
+	mux = New(WithLogLevel(LogLevelQuiet))
 	mux.addRoute(buildRoute("/a/:a", http.MethodGet, nil))
 	mux.addRoute(buildRoute("/b/:b", http.MethodGet, nil))
 	mux.addRoute(buildRoute("/c/:c", http.MethodGet, nil))
@@ -41,9 +41,9 @@ func TestAddRoute(t *testing.T) {
 
 func TestGetRoute(t *testing.T) {
 	must := must.New(t)
-	mux := New()
+	mux := New(WithLogLevel(LogLevelQuiet))
 	mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return String(rw, "ok")
+		return Res(rw).String("ok")
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -56,9 +56,9 @@ func TestGetRoute(t *testing.T) {
 	expected := "ok"
 	must.Equal(expected, result)
 
-	mux1 := New()
+	mux1 := New(WithLogLevel(LogLevelQuiet))
 	mux1.Get("/:a", func(rw http.ResponseWriter, r *http.Request) error {
-		return String(rw, "ok")
+		return Res(rw).String("ok")
 	})
 
 	req1 := httptest.NewRequest(http.MethodGet, "/123", nil)
@@ -93,7 +93,7 @@ func TestGetRoute(t *testing.T) {
 }
 
 func BenchmarkRouter(b *testing.B) {
-	mux := New()
+	mux := New(WithLogLevel(LogLevelQuiet))
 	defaultHandler := func(rw http.ResponseWriter, r *http.Request) error {
 		return nil
 	}

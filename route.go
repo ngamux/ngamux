@@ -11,11 +11,13 @@ import (
 type (
 	// Route describe a route object
 	Route struct {
+		RawPath    string
 		Path       string
 		Method     string
 		Handler    Handler
 		Params     [][]string
 		URLMatcher *regexp.Regexp
+		withBody   bool
 	}
 
 	routeMap map[string]map[string]Route
@@ -24,11 +26,19 @@ type (
 func buildRoute(url string, method string, handler Handler, middlewares ...MiddlewareFunc) Route {
 	handler = WithMiddlewares(middlewares...)(handler)
 
-	return Route{
-		Path:    url,
-		Method:  method,
-		Handler: handler,
+	route := Route{
+		RawPath:  url,
+		Path:     url,
+		Method:   method,
+		Handler:  handler,
+		withBody: true,
 	}
+
+	if method == http.MethodHead {
+		route.withBody = false
+	}
+
+	return route
 }
 
 func (mux *Ngamux) addRoute(route Route) {
@@ -44,6 +54,7 @@ func (mux *Ngamux) addRoute(route Route) {
 		}
 
 		mux.routes[route.Path][route.Method] = route
+		mux.Log(LogLevelInfo, "[ROUTE] %s %s registered", route.Method, route.RawPath)
 		return
 	}
 
@@ -67,6 +78,7 @@ func (mux *Ngamux) addRoute(route Route) {
 		mux.routesParam[route.Path] = map[string]Route{}
 	}
 	mux.routesParam[route.Path][route.Method] = route
+	mux.Log(LogLevelInfo, "[ROUTE] %s %s registered", route.Method, route.RawPath)
 }
 
 func buildURLParams(r *http.Request, route Route, path string) (*http.Request, Route) {
@@ -116,12 +128,16 @@ func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
 
 	var foundRoute Route
 	if len(foundRouteMap) <= 0 {
-		r = SetContextValue(r, "error", ErrorNotFound)
+		tmpR := Req(r)
+		tmpR.Locals("error", ErrorNotFound)
+		r = tmpR.Request
 		foundRoute.Handler = mux.config.GlobalErrorHandler
 	} else {
 		route, ok := foundRouteMap[r.Method]
 		if !ok {
-			r = SetContextValue(r, "error", ErrorMethodNotAllowed)
+			tmpR := Req(r)
+			tmpR.Locals("error", ErrorMethodNotAllowed)
+			r = tmpR.Request
 			foundRoute.Handler = mux.config.GlobalErrorHandler
 		} else {
 

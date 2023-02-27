@@ -5,8 +5,7 @@ Simple HTTP router for Go
 [![Go Version](https://img.shields.io/github/go-mod/go-version/ngamux/ngamux.svg)](https://github.com/ngamux/ngamux)
 [![GoDoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/ngamux/ngamux)
 [![GoReportCard](https://goreportcard.com/badge/github.com/ngamux/ngamux)](https://goreportcard.com/report/github.com/ngamux/ngamux)
-[![Coverage Status](https://coveralls.io/repos/github/ngamux/ngamux/badge.svg?branch=master)](https://coveralls.io/github/ngamux/ngamux?branch=master)
-
+[![Coverage Status](https://codecov.io/gh/ngamux/ngamux/branch/master/graph/badge.svg?token=7ORUPOWS3I)](https://codecov.io/gh/ngamux/ngamux)
 ---
 
 * [Installation](#installation)
@@ -32,7 +31,7 @@ import(
 )
 
 func main() {
-  mux := ngamux.NewNgamux()
+  mux := ngamux.New()
   mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
     return ngamux.JSON(rw, ngamux.Map{
       "message": "welcome!",

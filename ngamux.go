@@ -1,3 +1,10 @@
+// Ngamux is simple HTTP router for Go
+// Github Repository: https://github.com/ngamux/ngamux
+// Examples: https://github.com/ngamux/ngamux-example
+
+// Package ngamux is simple HTTP router for Go that compatible with net/http,
+// the standard library to serve HTTP. Designed to make everything goes
+// in simple way.
 package ngamux
 
 import (
@@ -29,17 +36,9 @@ type (
 )
 
 var (
-	_ http.Handler = &Ngamux{}
-	_ http.Handler = Handler(func(rw http.ResponseWriter, r *http.Request) error { return nil })
-
-	// ErrorNotFound is errors object when searching failure
-	ErrorNotFound = errors.New("not found")
-	// ErrorMethodNotAllowed is errors object when there access to invalid method
-	ErrorMethodNotAllowed = errors.New("method not allowed")
-
 	paramsFinder       = regexp.MustCompile("(:[a-zA-Z]+[0-9a-zA-Z]*)")
 	globalErrorHandler = func(rw http.ResponseWriter, r *http.Request) error {
-		err := GetContextValue(r, "error").(error)
+		err := Req(r).Locals("error").(error)
 		if errors.Is(err, ErrorNotFound) {
 			rw.WriteHeader(http.StatusNotFound)
 		} else if errors.Is(err, ErrorMethodNotAllowed) {
@@ -49,6 +48,20 @@ var (
 		fmt.Fprintln(rw, err)
 		return nil
 	}
+
+	allMethods = []string{
+		http.MethodGet,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodPatch,
+		http.MethodDelete,
+	}
+
+	// ErrorNotFound is errors object when searching failure
+	ErrorNotFound = errors.New("not found")
+
+	// ErrorMethodNotAllowed is errors object when there access to invalid method
+	ErrorMethodNotAllowed = errors.New("method not allowed")
 )
 
 // New returns new ngamux object
@@ -73,17 +86,32 @@ func New(opts ...func(*Config)) *Ngamux {
 // ServeHTTP run ngamux router matcher
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, r := mux.getRoute(r)
-	err := route.Handler(rw, r)
-	if err != nil {
-		rw.WriteHeader(500)
-		_, _ = rw.Write([]byte(err.Error()))
+
+	if route.withBody {
+		err := route.Handler(rw, r)
+		if err != nil {
+			rw.WriteHeader(500)
+
+			_, _ = rw.Write([]byte(err.Error()))
+		}
+	} else {
+		err := route.Handler(readOnlyResponseWriter{rw}, r)
+		if err != nil {
+			rw.WriteHeader(500)
+		}
 	}
+
 }
 
 // Use register global middleware
 func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
 	mux.middlewares = append(mux.middlewares, middlewares...)
 	mux.config.GlobalErrorHandler = WithMiddlewares(mux.middlewares...)(mux.config.GlobalErrorHandler)
+}
+
+// Config returns registered config (read only)
+func (mux Ngamux) Config() Config {
+	return mux.config
 }
 
 // Get register route for a url with Get request method
@@ -93,6 +121,15 @@ func (mux *Ngamux) Get(url string, handler Handler) {
 		return
 	}
 	mux.addRoute(buildRoute(url, http.MethodGet, handler, mux.middlewares...))
+}
+
+// Head register route for a url with Head request method
+func (mux *Ngamux) Head(url string, handler Handler) {
+	if mux.parent != nil {
+		mux.addRouteFromGroup(buildRoute(url, http.MethodHead, handler))
+		return
+	}
+	mux.addRoute(buildRoute(url, http.MethodHead, handler, mux.middlewares...))
 }
 
 // Post register route for a url with Post request method
@@ -141,7 +178,7 @@ func (mux *Ngamux) Head(url string, handler Handler) {
 
 // All register route for a url with any request method
 func (mux *Ngamux) All(url string, handler Handler) {
-	for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
+	for _, method := range allMethods {
 		if mux.parent != nil {
 			mux.addRouteFromGroup(buildRoute(url, method, handler))
 			return
@@ -149,4 +186,14 @@ func (mux *Ngamux) All(url string, handler Handler) {
 
 		mux.addRoute(buildRoute(url, method, handler, mux.middlewares...))
 	}
+}
+
+// With register middlewares and returns router
+func (mux *Ngamux) With(middlewares ...MiddlewareFunc) *Ngamux {
+	group := &Ngamux{
+		parent:      mux,
+		path:        mux.path,
+		middlewares: middlewares,
+	}
+	return group
 }

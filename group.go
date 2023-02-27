@@ -6,10 +6,6 @@ import (
 
 // Group returns new nested ngamux object
 func (mux *Ngamux) Group(url string, middlewares ...MiddlewareFunc) *Ngamux {
-	if mux.parent != nil {
-		panic("nested route group is not supported yet")
-	}
-
 	group := &Ngamux{
 		parent:      mux,
 		path:        url,
@@ -21,6 +17,16 @@ func (mux *Ngamux) Group(url string, middlewares ...MiddlewareFunc) *Ngamux {
 func (mux *Ngamux) addRouteFromGroup(route Route) {
 	url := path.Join(mux.path, route.Path)
 	middlewares := mux.middlewares
-	middlewares = append(middlewares, mux.parent.middlewares...)
-	mux.parent.addRoute(buildRoute(url, route.Method, route.Handler, middlewares...))
+	parent := mux.parent
+	for parent != nil {
+		url = path.Join(parent.path, url)
+		middlewares = append(middlewares, parent.middlewares...)
+		if parent.parent == nil {
+			break
+		}
+
+		parent = parent.parent
+	}
+
+	parent.addRoute(buildRoute(url, route.Method, route.Handler, middlewares...))
 }
