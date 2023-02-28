@@ -140,6 +140,11 @@ func (mux *Ngamux) getRoute(r *http.Request) (Route, *http.Request) {
 			r = tmpR.Request
 			foundRoute.Handler = mux.config.GlobalErrorHandler
 		} else {
+
+			if r.Method == http.MethodHead {
+				r.Body = nil
+			}
+
 			r, route = buildURLParams(r, route, path)
 			foundRoute = route
 		}
