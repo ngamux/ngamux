@@ -3,6 +3,7 @@ package ngamux
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 )
 
@@ -56,6 +57,23 @@ func (r *Response) JSON(data any) error {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("content-type", "application/json")
 	if err := json.NewEncoder(r).Encode(data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *Response) StaticFile(path string, data any) error {
+	r.WriteHeader(r.statusSafe())
+	r.Header().Add("Content-Type", "text/html; charset=utf-8")
+
+	temp, err := template.ParseFiles(path)
+	if err != nil {
+		return err
+	}
+
+	err = temp.Execute(r.ResponseWriter, data)
+	if err != nil {
 		return err
 	}
 
