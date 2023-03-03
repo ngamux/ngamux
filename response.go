@@ -63,7 +63,7 @@ func (r *Response) JSON(data any) error {
 	return nil
 }
 
-func (r *Response) StaticFile(path string, data any) error {
+func (r *Response) HTML(path string, data any) error {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("Content-Type", "text/html; charset=utf-8")
 
