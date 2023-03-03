@@ -28,7 +28,7 @@ func TestResStatus(t *testing.T) {
 	must.Equal(expected, r.status)
 }
 
-func TestResString(t *testing.T) {
+func TestResText(t *testing.T) {
 	must := must.New(t)
 	expected := "ok"
 	result := httptest.NewRecorder()
@@ -52,4 +52,30 @@ func TestResJSON(t *testing.T) {
 	must.Nil(err)
 	must.Equal(r.status, 0)
 	must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
+}
+
+func TestResHtml(t *testing.T) {
+	t.Run("positive", func(t *testing.T) {
+		must := must.New(t)
+		expected := `<span>mantap</span>`
+		result := httptest.NewRecorder()
+		r := Res(result)
+		err := r.Html("./response_test.html", nil)
+
+		must.Nil(err)
+		must.Equal(r.status, 0)
+		must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
+	})
+
+	t.Run("negative", func(t *testing.T) {
+		must := must.New(t)
+		expected := ""
+		result := httptest.NewRecorder()
+		r := Res(result)
+		err := r.Html("./response.html", nil)
+
+		must.NotNil(err)
+		must.Equal(r.status, 0)
+		must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
+	})
 }
