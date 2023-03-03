@@ -43,7 +43,7 @@ func TestGetRoute(t *testing.T) {
 	must := must.New(t)
 	mux := New(WithLogLevel(LogLevelQuiet))
 	mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -58,7 +58,7 @@ func TestGetRoute(t *testing.T) {
 
 	mux1 := New(WithLogLevel(LogLevelQuiet))
 	mux1.Get("/:a", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	})
 
 	req1 := httptest.NewRequest(http.MethodGet, "/123", nil)

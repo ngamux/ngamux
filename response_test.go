@@ -33,7 +33,7 @@ func TestResString(t *testing.T) {
 	expected := "ok"
 	result := httptest.NewRecorder()
 	r := Res(result)
-	err := r.String(expected)
+	err := r.Text(expected)
 
 	must.Nil(err)
 	must.Equal(r.status, 0)
@@ -45,7 +45,7 @@ func TestResJSON(t *testing.T) {
 	expected := `{"id":1}`
 	result := httptest.NewRecorder()
 	r := Res(result)
-	err := r.JSON(Map{
+	err := r.Json(Map{
 		"id": 1,
 	})
 

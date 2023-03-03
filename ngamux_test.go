@@ -65,7 +65,7 @@ func TestGet(t *testing.T) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -83,7 +83,7 @@ func TestHead(t *testing.T) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	mux.Head("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -101,7 +101,7 @@ func TestPost(t *testing.T) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	mux.Post("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -119,7 +119,7 @@ func TestPut(t *testing.T) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	mux.Put("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -137,7 +137,7 @@ func TestPatch(t *testing.T) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	mux.Patch("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -155,7 +155,7 @@ func TestDelete(t *testing.T) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	mux.Delete("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -173,7 +173,7 @@ func TestAll(t *testing.T) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	mux.All("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	})
 
 	methods := []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete}

@@ -43,8 +43,8 @@ func (r *Response) Status(status int) *Response {
 	return r
 }
 
-// String write string data to response body
-func (r *Response) String(data string) error {
+// Text writes text/plain data with simple string as response body
+func (r *Response) Text(data string) error {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("content-type", "text/plain")
 	_, err := fmt.Fprintln(r, data)
@@ -52,8 +52,8 @@ func (r *Response) String(data string) error {
 	return err
 }
 
-// JSON write JSON data to response
-func (r *Response) JSON(data any) error {
+// Json write application/json data with json encoded string as response body
+func (r *Response) Json(data any) error {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("content-type", "application/json")
 	if err := json.NewEncoder(r).Encode(data); err != nil {
@@ -63,7 +63,8 @@ func (r *Response) JSON(data any) error {
 	return nil
 }
 
-func (r *Response) HTML(path string, data any) error {
+// Html write text/html data with HTML string as response body
+func (r *Response) Html(path string, data any) error {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("Content-Type", "text/html; charset=utf-8")
 
@@ -72,7 +73,7 @@ func (r *Response) HTML(path string, data any) error {
 		return err
 	}
 
-	err = temp.Execute(r.ResponseWriter, data)
+	err = temp.Execute(r, data)
 	if err != nil {
 		return err
 	}

@@ -15,7 +15,7 @@ func TestGroup(t *testing.T) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	handler := func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).String("ok")
+		return Res(rw).Text("ok")
 	}
 	a := mux.Group("/a")
 	a.Get("", handler)
