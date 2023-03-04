@@ -33,9 +33,11 @@ import(
 func main() {
   mux := ngamux.New()
   mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
-    return ngamux.Res(rw).Status(http.StatusOK).JSON(ngamux.Map{
-      "message": "welcome!",
-    })
+    return ngamux.Res(rw).
+      Status(http.StatusOK).
+      Json(ngamux.Map{
+        "message": "welcome!",
+      })
   })
   
   http.ListenAndServe(":8080", mux)
@@ -47,7 +49,6 @@ See more [examples](https://github.com/ngamux/ngamux-example)!
 # Provided Middlewares
 * [CORS](https://github.com/ngamux/middleware/tree/master/cors)
 * [Recover](https://github.com/ngamux/middleware/tree/master/recover)
-* [Static](https://github.com/ngamux/middleware/tree/master/static)
 * [File Upload](https://github.com/ngamux/middleware/tree/master/fileupload)
 * [Log](https://github.com/ngamux/middleware/tree/master/log)
 
