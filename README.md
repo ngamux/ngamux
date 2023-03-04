@@ -51,6 +51,10 @@ See more [examples](https://github.com/ngamux/ngamux-example)!
 * [Recover](https://github.com/ngamux/middleware/tree/master/recover)
 * [File Upload](https://github.com/ngamux/middleware/tree/master/fileupload)
 * [Log](https://github.com/ngamux/middleware/tree/master/log)
+* [Auth JWT](https://github.com/ngamux/middleware/tree/master/authjwt)
+* [No Cache](https://github.com/ngamux/middleware/tree/master/nocache)
+* [Ping](https://github.com/ngamux/middleware/tree/master/ping)
+* [Redirect](https://github.com/ngamux/middleware/tree/master/redirect)
 
 # License
 This project is licensed under the [Mozilla Public License 2.0](https://github.com/ngamux/ngamux/blob/master/LICENSE).
