@@ -52,8 +52,8 @@ func (r *Response) Text(data string) error {
 	return err
 }
 
-// Json write application/json data with json encoded string as response body
-func (r *Response) Json(data any) error {
+// JSON write application/json data with json encoded string as response body
+func (r *Response) JSON(data any) error {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("content-type", "application/json")
 	if err := json.NewEncoder(r).Encode(data); err != nil {
@@ -63,8 +63,8 @@ func (r *Response) Json(data any) error {
 	return nil
 }
 
-// Html write text/html data with HTML string as response body
-func (r *Response) Html(path string, data any) error {
+// HTML write text/html data with HTML string as response body
+func (r *Response) HTML(path string, data any) error {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("Content-Type", "text/html; charset=utf-8")
 

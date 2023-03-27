@@ -45,7 +45,7 @@ func TestResJSON(t *testing.T) {
 	expected := `{"id":1}`
 	result := httptest.NewRecorder()
 	r := Res(result)
-	err := r.Json(Map{
+	err := r.JSON(Map{
 		"id": 1,
 	})
 
@@ -60,7 +60,7 @@ func TestResHtml(t *testing.T) {
 		expected := `<span>mantap</span>`
 		result := httptest.NewRecorder()
 		r := Res(result)
-		err := r.Html("./response_test.html", nil)
+		err := r.HTML("./response_test.html", nil)
 
 		must.Nil(err)
 		must.Equal(r.status, 0)
@@ -72,7 +72,7 @@ func TestResHtml(t *testing.T) {
 		expected := ""
 		result := httptest.NewRecorder()
 		r := Res(result)
-		err := r.Html("./response.html", nil)
+		err := r.HTML("./response.html", nil)
 
 		must.NotNil(err)
 		must.Equal(r.status, 0)
