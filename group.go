@@ -1,7 +1,6 @@
 package ngamux
 
 import (
-	"fmt"
 	"path"
 )
 
@@ -29,6 +28,5 @@ func (mux *Ngamux) addRouteFromGroup(route Route) {
 		parent = parent.parent
 	}
 
-	fmt.Println(url)
 	parent.addRoute(buildRoute(url, route.Method, route.Handler, middlewares...))
 }

@@ -48,7 +48,7 @@ func (mux *Ngamux) addRoute(route Route) {
 	)
 
 	// check if route doesn't have url param
-	if !strings.Contains(route.Path, ":") {
+	if !strings.Contains(route.Path, ":") && !strings.Contains(route.Path, "+") {
 		if mux.routes[route.Path] == nil {
 			mux.routes[route.Path] = map[string]Route{}
 		}
@@ -65,7 +65,11 @@ func (mux *Ngamux) addRoute(route Route) {
 		route.Params = append(route.Params, []string{val[0][1:]})
 	}
 
-	pathWithParams = mux.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z\\.\\-_]+)")
+	if strings.Contains(route.Path, ":") {
+		pathWithParams = mux.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z\\.\\-_]+)")
+	} else if strings.Contains(route.Path, "+") {
+		pathWithParams = mux.regexpParamFinded.ReplaceAllString(route.Path, "([0-9a-zA-Z\\.\\-/_]+)")
+	}
 	route.Path = pathWithParams
 
 	route.URLMatcher, err = regexp.Compile("^" + pathWithParams + "$")

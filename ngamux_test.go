@@ -60,21 +60,64 @@ func TestConfig(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	must := must.New(t)
-	mux := New(
-		WithLogLevel(LogLevelQuiet),
-	)
-	mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).Text("ok")
+	t.Run("simple", func(t *testing.T) {
+		must := must.New(t)
+		mux := New(
+			WithLogLevel(LogLevelQuiet),
+		)
+		mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
+			return Res(rw).Text("ok")
+		})
+
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		mux.ServeHTTP(rec, req)
+
+		result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+		expected := "ok"
+		must.Equal(expected, result)
 	})
 
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	mux.ServeHTTP(rec, req)
+	t.Run("plus", func(t *testing.T) {
+		must := must.New(t)
+		mux := New(
+			WithLogLevel(LogLevelQuiet),
+		)
+		mux.Get("/+", func(rw http.ResponseWriter, r *http.Request) error {
+			return Res(rw).Text("ok")
+		})
 
-	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
-	expected := "ok"
-	must.Equal(expected, result)
+		mux.Get("/users", func(rw http.ResponseWriter, r *http.Request) error {
+			return Res(rw).Text("ok")
+		})
+
+		mux.Get("/products/+", func(rw http.ResponseWriter, r *http.Request) error {
+			return Res(rw).Text("ok")
+		})
+
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/bebas/tapi/wajib/ada", nil)
+		mux.ServeHTTP(rec, req)
+
+		result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+		expected := "ok"
+		must.Equal(expected, result)
+
+		rec1 := httptest.NewRecorder()
+		req1 := httptest.NewRequest(http.MethodGet, "/users", nil)
+		mux.ServeHTTP(rec1, req1)
+
+		result = strings.ReplaceAll(rec1.Body.String(), "\n", "")
+		must.Equal(expected, result)
+
+		rec2 := httptest.NewRecorder()
+		req2 := httptest.NewRequest(http.MethodGet, "/products/nasi/goreng", nil)
+		mux.ServeHTTP(rec2, req2)
+
+		result = strings.ReplaceAll(rec2.Body.String(), "\n", "")
+		must.Equal(expected, result)
+	})
+
 }
 
 func TestHead(t *testing.T) {
