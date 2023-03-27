@@ -189,3 +189,21 @@ func (mux *Ngamux) With(middlewares ...MiddlewareFunc) *Ngamux {
 	}
 	return group
 }
+
+// Mount register router in path
+func (mux *Ngamux) Mount(path string, m *Ngamux) {
+	group := mux.Group(path)
+
+	for _, v := range m.routes {
+		for _, v2 := range v {
+			group.addRouteFromGroup(v2)
+		}
+	}
+
+	for _, v := range m.routesParam {
+		for _, v2 := range v {
+			group.addRouteFromGroup(v2)
+		}
+	}
+
+}

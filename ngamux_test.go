@@ -226,6 +226,28 @@ func TestWith(t *testing.T) {
 	must.NotNil(mux.parent)
 }
 
+func TestMount(t *testing.T) {
+	must := must.New(t)
+	mux := New(
+		WithLogLevel(LogLevelQuiet),
+	)
+	mux2 := New(
+		WithLogLevel(LogLevelQuiet),
+	)
+	mux2.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
+		return Res(rw).Text("ok")
+	})
+	mux.Mount("/users", mux2)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/users", nil)
+	mux.ServeHTTP(rec, req)
+
+	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+	expected := "ok"
+	must.Equal(expected, result)
+}
+
 func BenchmarkNgamux(b *testing.B) {
 	h1 := func(w http.ResponseWriter, r *http.Request) error { return nil }
 	h2 := func(w http.ResponseWriter, r *http.Request) error { return nil }
