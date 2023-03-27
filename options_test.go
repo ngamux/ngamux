@@ -6,22 +6,22 @@ import (
 	"github.com/golang-must/must"
 )
 
-func TestWithTrailingSlash(t *testing.T) {
-	t.Run("can set false to config.RemoveTrailingSlash", func(t *testing.T) {
+func TestOptions(t *testing.T) {
+	t.Run("set RemoveTrailingSlash", func(t *testing.T) {
 		must := must.New(t)
 
 		mux := New(WithTrailingSlash())
 		must.False(mux.config.RemoveTrailingSlash)
 	})
 
-	t.Run("can set globalErrorHandler to config.GlobalErrorHandler", func(t *testing.T) {
+	t.Run("set GlobalErrorHandler", func(t *testing.T) {
 		must := must.New(t)
 
 		mux := New(WithErrorHandler(globalErrorHandler))
 		must.NotNil(mux.config.GlobalErrorHandler)
 	})
 
-	t.Run("can set logLevel to config.LogLevel", func(t *testing.T) {
+	t.Run("set LogLevel", func(t *testing.T) {
 		must := must.New(t)
 
 		mux := New(WithLogLevel(LogLevelQuiet))
