@@ -111,3 +111,14 @@ func TestIsLocalhost(t *testing.T) {
 	result = Req(req).IsLocalhost()
 	must.True(result)
 }
+
+func TestGetIpAddress(t *testing.T) {
+
+	must := must.New(t)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+
+	// Inject IP Local
+	req.RemoteAddr = "127.0.0.1"
+	result := Req(req).GetIPAdress()
+	must.Equal("127.0.0.1", result)
+}

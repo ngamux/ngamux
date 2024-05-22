@@ -101,3 +101,23 @@ func (r *Request) Locals(key any, value ...any) any {
 func (r *Request) IsLocalhost() bool {
 	return strings.Contains(r.Host, "localhost") || strings.Contains(r.Host, "127.0.0.1")
 }
+
+// Get Client IP
+func (r Request) GetIPAdress() string {
+
+	var ipAddress string
+
+	// X-Real-Ip - fetches first true IP (if the requests sits behind multiple NAT sources/load balancer
+	ipAddress = r.Header.Get("X-Real-Ip")
+	if ipAddress == "" {
+		// X-Forwarded-For - if for some reason X-Real-Ip is blank and does not return response, get from X-Forwarded-For
+		ipAddress = r.Header.Get("X-Forwarded-For")
+	}
+
+	if ipAddress == "" {
+		// Remote Address - last resort (usually won't be reliable as this might be the last ip or if it is a naked http request to server ie no load balancer)
+		ipAddress = r.RemoteAddr
+	}
+
+	return ipAddress
+}
