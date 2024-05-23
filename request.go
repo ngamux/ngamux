@@ -121,3 +121,8 @@ func (r Request) GetIPAdress() string {
 
 	return ipAddress
 }
+
+// bind json to struct
+func (r Request) Bind(i any) error {
+	return json.NewDecoder(r.Body).Decode(i)
+}
