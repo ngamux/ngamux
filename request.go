@@ -3,13 +3,18 @@ package ngamux
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"reflect"
+	"strconv"
 	"strings"
 )
 
-type q map[string]any
+var (
+	unsupportedFieldType = errors.New("unsupported field type")
+)
 
 // Request define single request manager
 type Request struct {
@@ -46,23 +51,88 @@ func (r Request) Query(key string, fallback ...string) string {
 	return query
 }
 
-// This method will return map of queries
-func (r Request) QueriesParser() q {
-	queryValues, err := url.ParseQuery(r.URL.RawQuery)
-	if err != nil {
-		return nil
-	}
+// Parse query into struct
+func (r Request) QueriesParser(data any) error {
+	queryValues := r.URL.Query()
 
-	parsedMap := make(map[string]interface{})
-	for key, values := range queryValues {
-		if len(values) > 1 {
-			parsedMap[key] = values
-		} else {
-			parsedMap[key] = values[0]
+	val := reflect.ValueOf(data).Elem()
+	typ := val.Type()
+
+	for i := 0; i < val.NumField(); i++ {
+		field := typ.Field(i)
+		tag := field.Tag.Get("query")
+		if tag != "" {
+			if queryValue, found := queryValues[tag]; found && len(queryValue) > 0 {
+				fieldValue := val.Field(i)
+				if fieldValue.CanSet() {
+					if err := setFieldValue(fieldValue, queryValue[0]); err != nil {
+						return err
+					}
+				}
+			}
 		}
 	}
 
-	return parsedMap
+	return nil
+}
+
+func setFieldValue(fieldValue reflect.Value, value string) error {
+	switch fieldValue.Kind() {
+	case reflect.Int:
+		intValue, err := strconv.Atoi(value)
+		if err != nil {
+			return err
+		}
+		fieldValue.SetInt(int64(intValue))
+	case reflect.String:
+		fieldValue.SetString(value)
+	case reflect.Bool:
+		boolValue, err := strconv.ParseBool(value)
+		if err != nil {
+			return err
+		}
+		fieldValue.SetBool(boolValue)
+	case reflect.Float32, reflect.Float64:
+		floatValue, err := strconv.ParseFloat(value, fieldValue.Type().Bits())
+		if err != nil {
+			return err
+		}
+		fieldValue.SetFloat(floatValue)
+	case reflect.Struct:
+		nestedStruct := reflect.New(fieldValue.Type()).Elem()
+		if err := parseNestedStruct(nestedStruct, value); err != nil {
+			return err
+		}
+		fieldValue.Set(nestedStruct)
+	default:
+		return unsupportedFieldType
+	}
+	return nil
+}
+
+func parseNestedStruct(nestedStruct reflect.Value, value string) error {
+	queryValues, err := url.ParseQuery(value)
+	if err != nil {
+		return err
+	}
+
+	typ := nestedStruct.Type()
+	for i := 0; i < nestedStruct.NumField(); i++ {
+		field := typ.Field(i)
+		tag := field.Tag.Get("query")
+		if tag != "" {
+			if queryValue, found := queryValues[tag]; found && len(queryValue) > 0 {
+				fieldValue := nestedStruct.Field(i)
+				if fieldValue.CanSet() {
+					if err := setFieldValue(fieldValue, queryValue[0]); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 // FormValue returns data from form using a key
