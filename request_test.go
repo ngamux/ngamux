@@ -123,21 +123,13 @@ func TestGetIpAddress(t *testing.T) {
 	must.Equal("127.0.0.1", result)
 }
 
-func TestBindingJSONToStruct(t *testing.T) {
+func TestQueriesParser(t *testing.T) {
 	must := must.New(t)
+	req := httptest.NewRequest(http.MethodGet, "/q?foo1=bar1&foo2=bar2", nil)
 
-	bodyRequest := strings.NewReader(`{"username":"farda ayu","password":"nurfatika"}`)
-	req := httptest.NewRequest("POST", "/register", bodyRequest)
+	result := Req(req).QueriesParser()
 
-	var userRequest struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
-
-	if err := Req(req).Bind(&userRequest); err != nil {
-		t.FailNow()
-	}
-
-	must.Equal(userRequest.Username, "farda ayu")
-	must.Equal(userRequest.Password, "nurfatika")
+	must.Equal(result["foo1"], "bar1")
+	must.Equal(result["foo2"], "bar2")
+	must.Nil(result["foo3"])
 }

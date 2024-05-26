@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"strings"
 )
+
+type q map[string]any
 
 // Request define single request manager
 type Request struct {
@@ -41,6 +44,25 @@ func (r Request) Query(key string, fallback ...string) string {
 		return ""
 	}
 	return query
+}
+
+// This method will return map of queries
+func (r Request) QueriesParser() q {
+	queryValues, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+		return nil
+	}
+
+	parsedMap := make(map[string]interface{})
+	for key, values := range queryValues {
+		if len(values) > 1 {
+			parsedMap[key] = values
+		} else {
+			parsedMap[key] = values[0]
+		}
+	}
+
+	return parsedMap
 }
 
 // FormValue returns data from form using a key
@@ -120,9 +142,4 @@ func (r Request) GetIPAdress() string {
 	}
 
 	return ipAddress
-}
-
-// bind json to struct
-func (r Request) Bind(i any) error {
-	return json.NewDecoder(r.Body).Decode(i)
 }
