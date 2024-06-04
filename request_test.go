@@ -122,3 +122,66 @@ func TestGetIpAddress(t *testing.T) {
 	result := Req(req).GetIPAdress()
 	must.Equal("127.0.0.1", result)
 }
+
+type queryStruct struct {
+	Foo string `query:"foo"`
+	Bar string `query:"bar"`
+}
+
+type queryStructWithNested struct {
+	FirstName string  `query:"first_name"`
+	LastName  string  `query:"last_name"`
+	Age       int     `query:"age"`
+	Wallet    float64 `query:"wallet"`
+	IsHuman   bool    `query:"is_human"`
+	Address   struct {
+		City    string `query:"city"`
+		Country string `query:"country"`
+	} `query:"address"`
+}
+
+type queryStructNotValid struct {
+	FieldNotValid interface{} `query:"field_not_valid"` // <- dont use interface{} to data types
+}
+
+func TestQueriesParser(t *testing.T) {
+	t.Run("parse query url to struct", func(t *testing.T) {
+		must := must.New(t)
+		req := httptest.NewRequest(http.MethodGet, "/q?foo=foo&bar=bar", nil)
+
+		var qs queryStruct
+		err := Req(req).QueriesParser(&qs)
+		must.Nil(err)
+
+		must.Equal(qs.Foo, "foo")
+		must.Equal(qs.Bar, "bar")
+	})
+
+	t.Run("parse query url to nested struct", func(t *testing.T) {
+		must := must.New(t)
+		req := httptest.NewRequest(http.MethodGet, "/q?age=19&is_human=true&wallet=69.8&first_name=farda&last_name=nurfatika&address=city%3Dsemarang%26country%3Dindonesia", nil)
+
+		var qswn queryStructWithNested
+		err := Req(req).QueriesParser(&qswn)
+		must.Nil(err)
+
+		must.Equal(qswn.FirstName, "farda")
+		must.Equal(qswn.LastName, "nurfatika")
+		must.Equal(qswn.Age, 19)
+		must.Equal(qswn.IsHuman, true)
+		must.Equal(qswn.Wallet, 69.8)
+		must.Equal(qswn.Address.City, "semarang")
+		must.Equal(qswn.Address.Country, "indonesia")
+	})
+
+	t.Run("parse query to struct error", func(t *testing.T) {
+		must := must.New(t)
+		req := httptest.NewRequest(http.MethodGet, "/q?field_not_valid=xixixixi", nil)
+
+		var qs queryStructNotValid
+		err := Req(req).QueriesParser(&qs)
+		must.NotNil(err)
+
+		must.Equal(qs.FieldNotValid, nil)
+	})
+}
