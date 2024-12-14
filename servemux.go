@@ -38,7 +38,7 @@ func (h *HttpServeMux) HandlerFunc(method, path string, handlerFunc Handler) {
 		middlewares := make([]MiddlewareFunc, 0)
 		middlewares = append(middlewares, h.parent.middlewares...)
 		middlewares = append(middlewares, h.middlewares...)
-		h.parent.mux.HandleFunc(route, WithMiddlewares(h.middlewares...)(handlerFunc).ServeHTTP)
+		h.parent.mux.HandleFunc(route, WithMiddlewares(middlewares...)(handlerFunc).ServeHTTP)
 		return
 	}
 
