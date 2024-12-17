@@ -114,6 +114,14 @@ func (mux Ngamux) Config() Config {
 	return mux.config
 }
 
+func (mux *Ngamux) HandlerFunc(method, url string, handler Handler) {
+	if mux.parent != nil {
+		mux.addRouteFromGroup(buildRoute(url, method, handler))
+		return
+	}
+	mux.addRoute(buildRoute(url, method, handler, mux.middlewares...))
+}
+
 // Get register route for a url with Get request method
 func (mux *Ngamux) Get(url string, handler Handler) {
 	if mux.parent != nil {
