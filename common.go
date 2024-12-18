@@ -1,5 +1,7 @@
 package ngamux
 
+import "net/http"
+
 type (
 	// Map is key value type to store any data
 	Map map[string]any
@@ -9,7 +11,7 @@ type (
 
 // WithMiddlewares returns single middleware from multiple middleware
 func WithMiddlewares(middleware ...MiddlewareFunc) MiddlewareFunc {
-	return func(next Handler) Handler {
+	return func(next http.HandlerFunc) http.HandlerFunc {
 		h := next
 		if len(middleware) <= 0 {
 			return h

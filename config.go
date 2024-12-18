@@ -1,9 +1,11 @@
 package ngamux
 
+import "net/http"
+
 // Config define ngamux global configuration
 type Config struct {
 	RemoveTrailingSlash bool
-	GlobalErrorHandler  Handler
+	GlobalErrorHandler  http.HandlerFunc
 	LogLevel            LogLevel
 }
 

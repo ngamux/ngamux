@@ -105,7 +105,7 @@ func (mux Ngamux) Config() Config {
 	return mux.config
 }
 
-func (mux *Ngamux) HandlerFunc(method, url string, handler Handler) {
+func (mux *Ngamux) HandlerFunc(method, url string, handler http.HandlerFunc) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, method, handler))
 		return
@@ -114,7 +114,7 @@ func (mux *Ngamux) HandlerFunc(method, url string, handler Handler) {
 }
 
 // Get register route for a url with Get request method
-func (mux *Ngamux) Get(url string, handler Handler) {
+func (mux *Ngamux) Get(url string, handler http.HandlerFunc) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodGet, handler))
 		return
@@ -123,7 +123,7 @@ func (mux *Ngamux) Get(url string, handler Handler) {
 }
 
 // Head register route for a url with Head request method
-func (mux *Ngamux) Head(url string, handler Handler) {
+func (mux *Ngamux) Head(url string, handler http.HandlerFunc) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodHead, handler))
 		return
@@ -132,7 +132,7 @@ func (mux *Ngamux) Head(url string, handler Handler) {
 }
 
 // Post register route for a url with Post request method
-func (mux *Ngamux) Post(url string, handler Handler) {
+func (mux *Ngamux) Post(url string, handler http.HandlerFunc) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodPost, handler))
 		return
@@ -141,7 +141,7 @@ func (mux *Ngamux) Post(url string, handler Handler) {
 }
 
 // Patch register route for a url with Patch request method
-func (mux *Ngamux) Patch(url string, handler Handler) {
+func (mux *Ngamux) Patch(url string, handler http.HandlerFunc) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodPatch, handler))
 		return
@@ -150,7 +150,7 @@ func (mux *Ngamux) Patch(url string, handler Handler) {
 }
 
 // Put register route for a url with Put request method
-func (mux *Ngamux) Put(url string, handler Handler) {
+func (mux *Ngamux) Put(url string, handler http.HandlerFunc) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodPut, handler))
 		return
@@ -159,7 +159,7 @@ func (mux *Ngamux) Put(url string, handler Handler) {
 }
 
 // Delete register route for a url with Delete request method
-func (mux *Ngamux) Delete(url string, handler Handler) {
+func (mux *Ngamux) Delete(url string, handler http.HandlerFunc) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, http.MethodDelete, handler))
 		return
@@ -168,7 +168,7 @@ func (mux *Ngamux) Delete(url string, handler Handler) {
 }
 
 // All register route for a url with any request method
-func (mux *Ngamux) All(url string, handler Handler) {
+func (mux *Ngamux) All(url string, handler http.HandlerFunc) {
 	for _, method := range allMethods {
 		if mux.parent != nil {
 			mux.addRouteFromGroup(buildRoute(url, method, handler))

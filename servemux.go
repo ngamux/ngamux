@@ -29,7 +29,7 @@ func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.mux.ServeHTTP(w, r)
 }
 
-func (h *HttpServeMux) HandlerFunc(method, path string, handlerFunc Handler) {
+func (h *HttpServeMux) HandlerFunc(method, path string, handlerFunc http.HandlerFunc) {
 	if h.parent != nil {
 		if path == "/" {
 			path = ""
@@ -56,22 +56,22 @@ func (h *HttpServeMux) Group(path string) *HttpServeMux {
 	return res
 }
 
-func (h *HttpServeMux) Get(path string, handlerFunc Handler) {
+func (h *HttpServeMux) Get(path string, handlerFunc http.HandlerFunc) {
 	h.HandlerFunc(http.MethodGet, path, handlerFunc)
 }
 
-func (h *HttpServeMux) Post(path string, handlerFunc Handler) {
+func (h *HttpServeMux) Post(path string, handlerFunc http.HandlerFunc) {
 	h.HandlerFunc(http.MethodPost, path, handlerFunc)
 }
 
-func (h *HttpServeMux) Patch(path string, handlerFunc Handler) {
+func (h *HttpServeMux) Patch(path string, handlerFunc http.HandlerFunc) {
 	h.HandlerFunc(http.MethodPatch, path, handlerFunc)
 }
 
-func (h *HttpServeMux) Put(path string, handlerFunc Handler) {
+func (h *HttpServeMux) Put(path string, handlerFunc http.HandlerFunc) {
 	h.HandlerFunc(http.MethodPut, path, handlerFunc)
 }
 
-func (h *HttpServeMux) Delete(path string, handlerFunc Handler) {
+func (h *HttpServeMux) Delete(path string, handlerFunc http.HandlerFunc) {
 	h.HandlerFunc(http.MethodDelete, path, handlerFunc)
 }

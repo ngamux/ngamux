@@ -14,7 +14,7 @@ type (
 		RawPath    string
 		Path       string
 		Method     string
-		Handler    Handler
+		Handler    http.HandlerFunc
 		Params     [][]string
 		URLMatcher *regexp.Regexp
 	}
@@ -22,7 +22,7 @@ type (
 	routeMap map[string]map[string]Route
 )
 
-func buildRoute(url string, method string, handler Handler, middlewares ...MiddlewareFunc) Route {
+func buildRoute(url string, method string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) Route {
 	handler = WithMiddlewares(middlewares...)(handler)
 
 	route := Route{

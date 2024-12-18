@@ -4,13 +4,21 @@ import "net/http"
 
 type (
 	// MiddlewareFunc describe middleware function
-	MiddlewareFunc func(next Handler) Handler
+	MiddlewareFunc func(next http.HandlerFunc) http.HandlerFunc
 
 	// Handler describe function handler
-	Handler func(rw http.ResponseWriter, r *http.Request)
+	handler func(rw http.ResponseWriter, r *http.Request)
 )
 
 // ServeHTTP same as original Handler but for built in HTTP HandlerFunc
-func (h Handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (h handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	h(rw, r)
+}
+
+func ToHandler(h http.HandlerFunc) http.Handler {
+	return http.Handler(h)
+}
+
+func ToHandlerFunc(h http.Handler) http.HandlerFunc {
+	return http.HandlerFunc(h.ServeHTTP)
 }
