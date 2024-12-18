@@ -3,7 +3,6 @@ package ngamux
 import (
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 )
 
 type HttpServeMux struct {
@@ -27,20 +26,13 @@ func (h *HttpServeMux) Use(middlewares ...MiddlewareFunc) {
 }
 
 func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ww := httptest.NewRecorder()
-	h.mux.ServeHTTP(ww, r)
-	if ww.Result().StatusCode == http.StatusNotFound {
+	handler, pattern := h.mux.Handler(r)
+	if pattern == "GET /" && r.URL.Path != "/" {
 		WithMiddlewares(h.middlewares...)(http.NotFound).ServeHTTP(w, r)
 		return
 	}
 
-	for key, values := range ww.Header() {
-		for _, value := range values {
-			w.Header().Add(key, value)
-		}
-	}
-	w.WriteHeader(ww.Result().StatusCode)
-	w.Write(ww.Body.Bytes())
+	handler.ServeHTTP(w, r)
 }
 
 func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerFunc) {
