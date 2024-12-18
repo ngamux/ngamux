@@ -32,7 +32,7 @@ func TestUse(t *testing.T) {
 	mux := New(
 		WithLogLevel(LogLevelQuiet),
 	)
-	middleware := func(next Handler) Handler {
+	middleware := func(next http.HandlerFunc) http.HandlerFunc {
 		return func(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
@@ -234,7 +234,7 @@ func TestWith(t *testing.T) {
 	mux := New(
 		WithLogLevel(LogLevelQuiet),
 	)
-	mux = mux.With(func(next Handler) Handler {
+	mux = mux.With(func(next http.HandlerFunc) http.HandlerFunc {
 		return func(rw http.ResponseWriter, r *http.Request) {
 			next(rw, r)
 		}

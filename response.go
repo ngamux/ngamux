@@ -13,14 +13,6 @@ type Response struct {
 	status int
 }
 
-type readOnlyResponseWriter struct {
-	http.ResponseWriter
-}
-
-func (r readOnlyResponseWriter) Write(data []byte) (int, error) {
-	return 0, nil
-}
-
 // Res needs http.ResponseWriter and returns *Response object
 func Res(rw http.ResponseWriter) *Response {
 	return &Response{
@@ -71,4 +63,12 @@ func (r *Response) HTML(path string, data any) {
 	if err != nil {
 		return
 	}
+}
+
+type readOnlyResponseWriter struct {
+	http.ResponseWriter
+}
+
+func (r readOnlyResponseWriter) Write(data []byte) (int, error) {
+	return 0, nil
 }
