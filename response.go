@@ -44,39 +44,31 @@ func (r *Response) Status(status int) *Response {
 }
 
 // Text writes text/plain data with simple string as response body
-func (r *Response) Text(data string) error {
+func (r *Response) Text(data string) {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("content-type", "text/plain")
-	_, err := fmt.Fprintln(r, data)
-
-	return err
+	_, _ = fmt.Fprintln(r, data)
 }
 
 // JSON write application/json data with json encoded string as response body
-func (r *Response) JSON(data any) error {
+func (r *Response) JSON(data any) {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("content-type", "application/json")
-	if err := json.NewEncoder(r).Encode(data); err != nil {
-		return err
-	}
-
-	return nil
+	json.NewEncoder(r).Encode(data)
 }
 
 // HTML write text/html data with HTML string as response body
-func (r *Response) HTML(path string, data any) error {
+func (r *Response) HTML(path string, data any) {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("Content-Type", "text/html; charset=utf-8")
 
 	temp, err := template.ParseFiles(path)
 	if err != nil {
-		return err
+		return
 	}
 
 	err = temp.Execute(r, data)
 	if err != nil {
-		return err
+		return
 	}
-
-	return nil
 }

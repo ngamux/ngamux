@@ -1,7 +1,6 @@
 package ngamux
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -34,8 +33,7 @@ func TestUse(t *testing.T) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	middleware := func(next Handler) Handler {
-		return func(rw http.ResponseWriter, r *http.Request) error {
-			return nil
+		return func(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 	mux.Use(middleware)
@@ -65,8 +63,8 @@ func TestGet(t *testing.T) {
 		mux := New(
 			WithLogLevel(LogLevelQuiet),
 		)
-		mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
-			return Res(rw).Text("ok")
+		mux.Get("/", func(rw http.ResponseWriter, r *http.Request) {
+			Res(rw).Text("ok")
 		})
 
 		rec := httptest.NewRecorder()
@@ -83,16 +81,16 @@ func TestGet(t *testing.T) {
 		mux := New(
 			WithLogLevel(LogLevelQuiet),
 		)
-		mux.Get("/+", func(rw http.ResponseWriter, r *http.Request) error {
-			return Res(rw).Text("ok")
+		mux.Get("/+", func(rw http.ResponseWriter, r *http.Request) {
+			Res(rw).Text("ok")
 		})
 
-		mux.Get("/users", func(rw http.ResponseWriter, r *http.Request) error {
-			return Res(rw).Text("ok")
+		mux.Get("/users", func(rw http.ResponseWriter, r *http.Request) {
+			Res(rw).Text("ok")
 		})
 
-		mux.Get("/products/+", func(rw http.ResponseWriter, r *http.Request) error {
-			return Res(rw).Text("ok")
+		mux.Get("/products/+", func(rw http.ResponseWriter, r *http.Request) {
+			Res(rw).Text("ok")
 		})
 
 		rec := httptest.NewRecorder()
@@ -125,8 +123,8 @@ func TestHead(t *testing.T) {
 	mux := New(
 		WithLogLevel(LogLevelQuiet),
 	)
-	mux.Head("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).Text("ok")
+	mux.Head("/", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -143,8 +141,8 @@ func TestPost(t *testing.T) {
 	mux := New(
 		WithLogLevel(LogLevelQuiet),
 	)
-	mux.Post("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).Text("ok")
+	mux.Post("/", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -161,8 +159,8 @@ func TestPut(t *testing.T) {
 	mux := New(
 		WithLogLevel(LogLevelQuiet),
 	)
-	mux.Put("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).Text("ok")
+	mux.Put("/", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -179,8 +177,8 @@ func TestPatch(t *testing.T) {
 	mux := New(
 		WithLogLevel(LogLevelQuiet),
 	)
-	mux.Patch("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).Text("ok")
+	mux.Patch("/", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -197,8 +195,8 @@ func TestDelete(t *testing.T) {
 	mux := New(
 		WithLogLevel(LogLevelQuiet),
 	)
-	mux.Delete("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).Text("ok")
+	mux.Delete("/", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
 	})
 
 	rec := httptest.NewRecorder()
@@ -215,8 +213,8 @@ func TestAll(t *testing.T) {
 	mux := New(
 		WithLogLevel(LogLevelQuiet),
 	)
-	mux.All("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).Text("ok")
+	mux.All("/", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
 	})
 
 	methods := []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete}
@@ -231,38 +229,14 @@ func TestAll(t *testing.T) {
 	}
 }
 
-func TestErrorResponse(t *testing.T) {
-	must := must.New(t)
-	mux := New(
-		WithLogLevel(LogLevelQuiet),
-	)
-	mux.Get("/error-method", func(rw http.ResponseWriter, r *http.Request) error {
-		return errors.New("something bad")
-	})
-
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/error-method", nil)
-
-	mux.ServeHTTP(rec, req)
-
-	result := rec.Result()
-	resultBody := strings.ReplaceAll(rec.Body.String(), "\n", "")
-	expectedBody := "something bad"
-	must.Equal(expectedBody, resultBody)
-
-	resultStatus := result.StatusCode
-	expectedStatus := 500
-	must.Equal(expectedStatus, resultStatus)
-}
-
 func TestWith(t *testing.T) {
 	must := must.New(t)
 	mux := New(
 		WithLogLevel(LogLevelQuiet),
 	)
 	mux = mux.With(func(next Handler) Handler {
-		return func(rw http.ResponseWriter, r *http.Request) error {
-			return next(rw, r)
+		return func(rw http.ResponseWriter, r *http.Request) {
+			next(rw, r)
 		}
 	})
 	must.NotNil(mux)
@@ -277,8 +251,8 @@ func TestMount(t *testing.T) {
 	mux2 := New(
 		WithLogLevel(LogLevelQuiet),
 	)
-	mux2.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).Text("ok")
+	mux2.Get("/", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
 	})
 	mux.Mount("/users", mux2)
 
@@ -292,12 +266,12 @@ func TestMount(t *testing.T) {
 }
 
 func BenchmarkNgamux(b *testing.B) {
-	h1 := func(w http.ResponseWriter, r *http.Request) error { return nil }
-	h2 := func(w http.ResponseWriter, r *http.Request) error { return nil }
-	h3 := func(w http.ResponseWriter, r *http.Request) error { return nil }
-	h4 := func(w http.ResponseWriter, r *http.Request) error { return nil }
-	h5 := func(w http.ResponseWriter, r *http.Request) error { return nil }
-	h6 := func(w http.ResponseWriter, r *http.Request) error { return nil }
+	h1 := func(w http.ResponseWriter, r *http.Request) {}
+	h2 := func(w http.ResponseWriter, r *http.Request) {}
+	h3 := func(w http.ResponseWriter, r *http.Request) {}
+	h4 := func(w http.ResponseWriter, r *http.Request) {}
+	h5 := func(w http.ResponseWriter, r *http.Request) {}
+	h6 := func(w http.ResponseWriter, r *http.Request) {}
 
 	mux := New(
 		WithLogLevel(LogLevelQuiet),

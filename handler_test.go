@@ -13,8 +13,8 @@ func TestServeHTTP(t *testing.T) {
 	must := must.New(t)
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/a", nil)
-	handler := Handler(func(rw http.ResponseWriter, r *http.Request) error {
-		return Res(rw).Text("ok")
+	handler := Handler(func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
 	})
 	handler.ServeHTTP(rec, req)
 

@@ -9,13 +9,11 @@ import (
 
 func TestWithMiddlewares(t *testing.T) {
 	must := must.New(t)
-	result := WithMiddlewares()(func(rw http.ResponseWriter, r *http.Request) error {
-		return nil
+	result := WithMiddlewares()(func(rw http.ResponseWriter, r *http.Request) {
 	})
 	must.NotNil(result)
 
-	result = WithMiddlewares(nil)(func(rw http.ResponseWriter, r *http.Request) error {
-		return nil
+	result = WithMiddlewares(nil)(func(rw http.ResponseWriter, r *http.Request) {
 	})
 	must.NotNil(result)
 

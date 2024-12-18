@@ -7,10 +7,10 @@ type (
 	MiddlewareFunc func(next Handler) Handler
 
 	// Handler describe function handler
-	Handler func(rw http.ResponseWriter, r *http.Request) error
+	Handler func(rw http.ResponseWriter, r *http.Request)
 )
 
 // ServeHTTP same as original Handler but for built in HTTP HandlerFunc
 func (h Handler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	_ = h(rw, r)
+	h(rw, r)
 }

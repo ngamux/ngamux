@@ -33,9 +33,8 @@ func TestResText(t *testing.T) {
 	expected := "ok"
 	result := httptest.NewRecorder()
 	r := Res(result)
-	err := r.Text(expected)
+	r.Text(expected)
 
-	must.Nil(err)
 	must.Equal(r.status, 0)
 	must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
 }
@@ -45,11 +44,10 @@ func TestResJSON(t *testing.T) {
 	expected := `{"id":1}`
 	result := httptest.NewRecorder()
 	r := Res(result)
-	err := r.JSON(Map{
+	r.JSON(Map{
 		"id": 1,
 	})
 
-	must.Nil(err)
 	must.Equal(r.status, 0)
 	must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
 }
@@ -60,9 +58,8 @@ func TestResHtml(t *testing.T) {
 		expected := `<span>mantap</span>`
 		result := httptest.NewRecorder()
 		r := Res(result)
-		err := r.HTML("./response_test.html", nil)
+		r.HTML("./response_test.html", nil)
 
-		must.Nil(err)
 		must.Equal(r.status, 0)
 		must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
 	})
@@ -72,9 +69,8 @@ func TestResHtml(t *testing.T) {
 		expected := ""
 		result := httptest.NewRecorder()
 		r := Res(result)
-		err := r.HTML("./response.html", nil)
+		r.HTML("./response.html", nil)
 
-		must.NotNil(err)
 		must.Equal(r.status, 0)
 		must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
 	})

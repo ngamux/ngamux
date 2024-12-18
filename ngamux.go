@@ -37,7 +37,7 @@ type (
 
 var (
 	paramsFinder       = regexp.MustCompile(`(:[a-zA-Z]+[0-9a-zA-Z]*|\+)`)
-	globalErrorHandler = func(rw http.ResponseWriter, r *http.Request) error {
+	globalErrorHandler = func(rw http.ResponseWriter, r *http.Request) {
 		err := Req(r).Locals("error").(error)
 		if errors.Is(err, ErrorNotFound) {
 			rw.WriteHeader(http.StatusNotFound)
@@ -46,7 +46,6 @@ var (
 		}
 
 		fmt.Fprintln(rw, err)
-		return nil
 	}
 
 	allMethods = []string{
@@ -88,19 +87,11 @@ func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, r := mux.getRoute(r)
 
 	if route.withBody {
-		err := route.Handler(rw, r)
-		if err != nil {
-			rw.WriteHeader(500)
-
-			_, _ = rw.Write([]byte(err.Error()))
-		}
-	} else {
-		err := route.Handler(readOnlyResponseWriter{rw}, r)
-		if err != nil {
-			rw.WriteHeader(500)
-		}
+		route.Handler(rw, r)
+		return
 	}
 
+	route.Handler(readOnlyResponseWriter{rw}, r)
 }
 
 // Use register global middleware
