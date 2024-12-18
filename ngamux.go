@@ -86,12 +86,12 @@ func New(opts ...func(*Config)) *Ngamux {
 func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, r := mux.getRoute(r)
 
-	if route.withBody {
-		route.Handler(rw, r)
+	if r.Method == http.MethodHead {
+		route.Handler(readOnlyResponseWriter{rw}, r)
 		return
 	}
 
-	route.Handler(readOnlyResponseWriter{rw}, r)
+	route.Handler(rw, r)
 }
 
 // Use register global middleware
