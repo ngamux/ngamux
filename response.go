@@ -54,7 +54,7 @@ func (r *Response) Text(data string) {
 func (r *Response) JSON(data any) {
 	r.WriteHeader(r.statusSafe())
 	r.Header().Add("content-type", "application/json")
-	json.NewEncoder(r).Encode(data)
+	_ = json.NewEncoder(r).Encode(data)
 }
 
 // HTML write text/html data with HTML string as response body
