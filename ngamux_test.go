@@ -277,10 +277,10 @@ func BenchmarkNgamux(b *testing.B) {
 		WithLogLevel(LogLevelQuiet),
 	)
 	mux.Get("/", h1)
-	mux.Get("/hi", h2)
-	mux.Get("/sup/:id/and/:this", h3)
+	mux.Get("/general", h2)
+	mux.Get("/general/:id/and/:this", h3)
 
-	mux1 := mux.Group("/sharing/:x/:hash")
+	mux1 := mux.Group("/group/:x/:hash")
 	mux1.Get("/", h4)          // subrouter-1
 	mux1.Get("/{network}", h5) // subrouter-1
 	mux1.Get("/twitter", h5)
@@ -291,17 +291,67 @@ func BenchmarkNgamux(b *testing.B) {
 
 	routes := []string{
 		"/",
-		"/hi",
-		"/sup/123/and/this",
-		"/sup/123/foo/this",
-		"/sharing/z/aBc",                 // subrouter-1
-		"/sharing/z/aBc/twitter",         // subrouter-1
-		"/sharing/z/aBc/direct",          // subrouter-2
-		"/sharing/z/aBc/direct/download", // subrouter-2
+		"/general",
+		"/general/123/and/this",
+		"/general/123/foo/this",
+		"/group/z/aBc",                 // subrouter-1
+		"/group/z/aBc/twitter",         // subrouter-1
+		"/group/z/aBc/direct",          // subrouter-2
+		"/group/z/aBc/direct/download", // subrouter-2
 	}
 
 	for _, path := range routes {
-		b.Run("route:"+path, func(b *testing.B) {
+		b.Run("route/"+path, func(b *testing.B) {
+			b.ResetTimer()
+			w := httptest.NewRecorder()
+			r, _ := http.NewRequest("GET", path, nil)
+
+			b.ReportAllocs()
+			b.ResetTimer()
+
+			for i := 0; i < b.N; i++ {
+				mux.ServeHTTP(w, r)
+			}
+		})
+	}
+}
+
+func BenchmarkHttpServeMux(b *testing.B) {
+	h1 := func(w http.ResponseWriter, r *http.Request) {}
+	h2 := func(w http.ResponseWriter, r *http.Request) {}
+	h3 := func(w http.ResponseWriter, r *http.Request) {}
+	h4 := func(w http.ResponseWriter, r *http.Request) {}
+	h5 := func(w http.ResponseWriter, r *http.Request) {}
+	h6 := func(w http.ResponseWriter, r *http.Request) {}
+
+	mux := NewHttpServeMux()
+	mux.Get("/", h1)
+	mux.Get("/general", h2)
+	mux.Get("/general/:id/and/:this", h3)
+
+	mux1 := mux.Group("/group/:x/:hash")
+	mux1.Get("/", h4)          // subrouter-1
+	mux1.Get("/{network}", h5) // subrouter-1
+	mux1.Get("/twitter", h5)
+
+	mux2 := mux.Group("/direct")
+	mux2.Get("/", h6) // subrouter-2
+	mux2.Get("/download", h6)
+
+	routes := []string{
+		"/",
+		"/general",
+		"/general/123/and/this",
+		"/general/123/foo/this",
+		"/group/z/aBc",                 // subrouter-1
+		"/group/z/aBc/twitter",         // subrouter-1
+		"/group/z/aBc/direct",          // subrouter-2
+		"/group/z/aBc/direct/download", // subrouter-2
+	}
+
+	for _, path := range routes {
+		b.Run("route/"+path, func(b *testing.B) {
+			b.ResetTimer()
 			w := httptest.NewRecorder()
 			r, _ := http.NewRequest("GET", path, nil)
 
