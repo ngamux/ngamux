@@ -3,7 +3,7 @@ package ngamux
 import "net/http"
 
 type Router interface {
-	HandlerFunc(string, string, http.HandlerFunc)
+	HandleFunc(string, string, http.HandlerFunc)
 	Get(string, http.HandlerFunc)
 	Post(string, http.HandlerFunc)
 	Put(string, http.HandlerFunc)
@@ -32,7 +32,7 @@ func (a *Annotation) annotate(method, path string, handler http.HandlerFunc) {
 
 func (a *Annotation) HandlerFunc(method, path string, handler http.HandlerFunc) {
 	a.annotate(method, path, handler)
-	a.Mux.HandlerFunc(method, path, handler)
+	a.Mux.HandleFunc(method, path, handler)
 }
 func (a *Annotation) Get(path string, handler http.HandlerFunc) {
 	a.annotate(http.MethodGet, path, handler)

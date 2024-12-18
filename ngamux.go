@@ -105,7 +105,7 @@ func (mux Ngamux) Config() Config {
 	return mux.config
 }
 
-func (mux *Ngamux) HandlerFunc(method, url string, handler http.HandlerFunc) {
+func (mux *Ngamux) HandleFunc(method, url string, handler http.HandlerFunc) {
 	if mux.parent != nil {
 		mux.addRouteFromGroup(buildRoute(url, method, handler))
 		return

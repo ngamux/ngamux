@@ -29,7 +29,7 @@ func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.mux.ServeHTTP(w, r)
 }
 
-func (h *HttpServeMux) HandlerFunc(method, path string, handlerFunc http.HandlerFunc) {
+func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerFunc) {
 	if h.parent != nil {
 		if path == "/" {
 			path = ""
@@ -38,12 +38,12 @@ func (h *HttpServeMux) HandlerFunc(method, path string, handlerFunc http.Handler
 		middlewares := make([]MiddlewareFunc, 0)
 		middlewares = append(middlewares, h.parent.middlewares...)
 		middlewares = append(middlewares, h.middlewares...)
-		h.parent.mux.HandleFunc(route, WithMiddlewares(middlewares...)(handlerFunc).ServeHTTP)
+		h.parent.mux.Handle(route, WithMiddlewares(middlewares...)(handlerFunc))
 		return
 	}
 
 	route := fmt.Sprintf("%s %s", method, path)
-	h.mux.HandleFunc(route, WithMiddlewares(h.middlewares...)(handlerFunc).ServeHTTP)
+	h.mux.HandleFunc(route, handlerFunc)
 }
 
 func (h *HttpServeMux) Group(path string) *HttpServeMux {
@@ -57,21 +57,21 @@ func (h *HttpServeMux) Group(path string) *HttpServeMux {
 }
 
 func (h *HttpServeMux) Get(path string, handlerFunc http.HandlerFunc) {
-	h.HandlerFunc(http.MethodGet, path, handlerFunc)
+	h.HandleFunc(http.MethodGet, path, handlerFunc)
 }
 
 func (h *HttpServeMux) Post(path string, handlerFunc http.HandlerFunc) {
-	h.HandlerFunc(http.MethodPost, path, handlerFunc)
+	h.HandleFunc(http.MethodPost, path, handlerFunc)
 }
 
 func (h *HttpServeMux) Patch(path string, handlerFunc http.HandlerFunc) {
-	h.HandlerFunc(http.MethodPatch, path, handlerFunc)
+	h.HandleFunc(http.MethodPatch, path, handlerFunc)
 }
 
 func (h *HttpServeMux) Put(path string, handlerFunc http.HandlerFunc) {
-	h.HandlerFunc(http.MethodPut, path, handlerFunc)
+	h.HandleFunc(http.MethodPut, path, handlerFunc)
 }
 
 func (h *HttpServeMux) Delete(path string, handlerFunc http.HandlerFunc) {
-	h.HandlerFunc(http.MethodDelete, path, handlerFunc)
+	h.HandleFunc(http.MethodDelete, path, handlerFunc)
 }
