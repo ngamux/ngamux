@@ -1,6 +1,7 @@
 package ngamux
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -38,21 +39,28 @@ func (r *Response) Status(status int) *Response {
 // Text writes text/plain data with simple string as response body
 func (r *Response) Text(data string) {
 	r.WriteHeader(r.statusSafe())
-	r.Header().Add("content-type", "text/plain")
+	r.Header().Add("Content-Type", "text/plain")
 	_, _ = fmt.Fprintln(r, data)
 }
 
 // JSON write application/json data with json encoded string as response body
 func (r *Response) JSON(data any) {
+	buf := &bytes.Buffer{}
+	enc := json.NewEncoder(buf)
+	if err := enc.Encode(data); err != nil {
+		http.Error(r, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	r.Header().Set("Content-Type", "application/json")
 	r.WriteHeader(r.statusSafe())
-	r.Header().Add("content-type", "application/json")
-	_ = json.NewEncoder(r).Encode(data)
+	_, _ = r.Write(buf.Bytes())
 }
 
 // HTML write text/html data with HTML string as response body
 func (r *Response) HTML(path string, data any) {
 	r.WriteHeader(r.statusSafe())
-	r.Header().Add("Content-Type", "text/html; charset=utf-8")
+	r.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	temp, err := template.ParseFiles(path)
 	if err != nil {
