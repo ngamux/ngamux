@@ -27,7 +27,7 @@ func (h *HttpServeMux) Use(middlewares ...MiddlewareFunc) {
 
 func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler, pattern := h.mux.Handler(r)
-	if pattern == "GET /" && r.URL.Path != "/" {
+	if pattern == "" || (pattern == "GET /" && r.URL.Path != "/") {
 		WithMiddlewares(h.middlewares...)(http.NotFound).ServeHTTP(w, r)
 		return
 	}
