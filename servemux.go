@@ -26,13 +26,13 @@ func (h *HttpServeMux) Use(middlewares ...MiddlewareFunc) {
 }
 
 func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	handler, pattern := h.mux.Handler(r)
+	_, pattern := h.mux.Handler(r)
 	if pattern == "" || (pattern == "GET /" && r.URL.Path != "/") {
 		WithMiddlewares(h.middlewares...)(http.NotFound).ServeHTTP(w, r)
 		return
 	}
 
-	handler.ServeHTTP(w, r)
+	h.mux.ServeHTTP(w, r)
 }
 
 func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerFunc) {
@@ -49,7 +49,7 @@ func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerF
 	}
 
 	route := fmt.Sprintf("%s %s", method, path)
-	h.mux.HandleFunc(route, handlerFunc)
+	h.mux.HandleFunc(route, WithMiddlewares(h.middlewares...)(handlerFunc))
 }
 
 func (h *HttpServeMux) Group(path string) *HttpServeMux {
