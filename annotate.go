@@ -1,8 +1,11 @@
 package ngamux
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type Router interface {
+	getPath() string
 	HandleFunc(string, string, http.HandlerFunc)
 	Get(string, http.HandlerFunc)
 	Post(string, http.HandlerFunc)
@@ -26,6 +29,10 @@ func (mux *HttpServeMux) Annotate(annotators ...Annotator) *Annotation {
 
 func (a *Annotation) annotate(method, path string, handler http.HandlerFunc) {
 	for _, ann := range a.Annotators {
+		if parent := a.Mux; parent != nil {
+			ann(buildRoute(parent.getPath()+path, method, handler))
+			continue
+		}
 		ann(buildRoute(path, method, handler))
 	}
 }
