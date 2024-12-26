@@ -31,7 +31,6 @@ func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		WithMiddlewares(h.middlewares...)(http.NotFound).ServeHTTP(w, r)
 		return
 	}
-
 	h.mux.ServeHTTP(w, r)
 }
 
@@ -57,7 +56,7 @@ func (h *HttpServeMux) Group(path string) *HttpServeMux {
 		path,
 		http.NewServeMux(),
 		h,
-		h.middlewares,
+		make([]MiddlewareFunc, 0),
 	}
 	return res
 }
