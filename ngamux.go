@@ -207,9 +207,9 @@ func (mux *Ngamux) Mount(path string, m *Ngamux) {
 
 }
 
-func (mux *Ngamux) getParent() Router {
-	return mux.parent
-}
+// func (mux *Ngamux) getParent() Router {
+// 	return mux.parent
+// }
 
 func (mux *Ngamux) getPath() string {
 	return mux.path

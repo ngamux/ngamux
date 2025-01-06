@@ -80,9 +80,10 @@ func (h *HttpServeMux) Put(path string, handlerFunc http.HandlerFunc) {
 func (h *HttpServeMux) Delete(path string, handlerFunc http.HandlerFunc) {
 	h.HandleFunc(http.MethodDelete, path, handlerFunc)
 }
-func (mux *HttpServeMux) getParent() Router {
-	return mux.parent
-}
+
+//	func (mux *HttpServeMux) getParent() Router {
+//		return mux.parent
+//	}
 func (mux *HttpServeMux) getPath() string {
 	return mux.path
 }
