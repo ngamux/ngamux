@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -23,6 +24,7 @@ type (
 )
 
 func buildRoute(url string, method string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) Route {
+	slices.Reverse(middlewares)
 	handler = WithMiddlewares(middlewares...)(handler)
 
 	route := Route{

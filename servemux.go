@@ -3,6 +3,7 @@ package ngamux
 import (
 	"fmt"
 	"net/http"
+	"slices"
 )
 
 type HttpServeMux struct {
@@ -34,15 +35,15 @@ func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.mux.ServeHTTP(w, r)
 }
 
-func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerFunc) {
+func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
+	slices.Reverse(middlewares)
+	middlewares = append(h.middlewares, middlewares...)
 	if h.parent != nil {
 		if path == "/" {
 			path = ""
 		}
 		route := fmt.Sprintf("%s %s%s", method, h.path, path)
-		middlewares := make([]MiddlewareFunc, 0)
-		middlewares = append(middlewares, h.parent.middlewares...)
-		middlewares = append(middlewares, h.middlewares...)
+		middlewares := append(h.parent.middlewares, middlewares...)
 		h.parent.mux.Handle(route, WithMiddlewares(middlewares...)(handlerFunc))
 		return
 	}
@@ -61,24 +62,24 @@ func (h *HttpServeMux) Group(path string) *HttpServeMux {
 	return res
 }
 
-func (h *HttpServeMux) Get(path string, handlerFunc http.HandlerFunc) {
-	h.HandleFunc(http.MethodGet, path, handlerFunc)
+func (h *HttpServeMux) Get(path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
+	h.HandleFunc(http.MethodGet, path, handlerFunc, middlewares...)
 }
 
-func (h *HttpServeMux) Post(path string, handlerFunc http.HandlerFunc) {
-	h.HandleFunc(http.MethodPost, path, handlerFunc)
+func (h *HttpServeMux) Post(path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
+	h.HandleFunc(http.MethodPost, path, handlerFunc, middlewares...)
 }
 
-func (h *HttpServeMux) Patch(path string, handlerFunc http.HandlerFunc) {
-	h.HandleFunc(http.MethodPatch, path, handlerFunc)
+func (h *HttpServeMux) Patch(path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
+	h.HandleFunc(http.MethodPatch, path, handlerFunc, middlewares...)
 }
 
-func (h *HttpServeMux) Put(path string, handlerFunc http.HandlerFunc) {
-	h.HandleFunc(http.MethodPut, path, handlerFunc)
+func (h *HttpServeMux) Put(path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
+	h.HandleFunc(http.MethodPut, path, handlerFunc, middlewares...)
 }
 
-func (h *HttpServeMux) Delete(path string, handlerFunc http.HandlerFunc) {
-	h.HandleFunc(http.MethodDelete, path, handlerFunc)
+func (h *HttpServeMux) Delete(path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
+	h.HandleFunc(http.MethodDelete, path, handlerFunc, middlewares...)
 }
 
 //	func (mux *HttpServeMux) getParent() Router {

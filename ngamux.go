@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"slices"
 )
 
 // KeyContext describe key type for ngamux context
@@ -96,6 +97,7 @@ func (mux *Ngamux) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 // Use register global middleware
 func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
+	slices.Reverse(middlewares)
 	mux.middlewares = append(mux.middlewares, middlewares...)
 	mux.config.GlobalErrorHandler = WithMiddlewares(mux.middlewares...)(mux.config.GlobalErrorHandler)
 }
@@ -105,73 +107,73 @@ func (mux Ngamux) Config() Config {
 	return mux.config
 }
 
-func (mux *Ngamux) HandleFunc(method, url string, handler http.HandlerFunc) {
+func (mux *Ngamux) HandleFunc(method, url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(buildRoute(url, method, handler))
+		mux.addRouteFromGroup(buildRoute(url, method, handler, middlewares...))
 		return
 	}
 	mux.addRoute(buildRoute(url, method, handler, mux.middlewares...))
 }
 
 // Get register route for a url with Get request method
-func (mux *Ngamux) Get(url string, handler http.HandlerFunc) {
+func (mux *Ngamux) Get(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(buildRoute(url, http.MethodGet, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodGet, handler, middlewares...))
 		return
 	}
 	mux.addRoute(buildRoute(url, http.MethodGet, handler, mux.middlewares...))
 }
 
 // Head register route for a url with Head request method
-func (mux *Ngamux) Head(url string, handler http.HandlerFunc) {
+func (mux *Ngamux) Head(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(buildRoute(url, http.MethodHead, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodHead, handler, middlewares...))
 		return
 	}
 	mux.addRoute(buildRoute(url, http.MethodHead, handler, mux.middlewares...))
 }
 
 // Post register route for a url with Post request method
-func (mux *Ngamux) Post(url string, handler http.HandlerFunc) {
+func (mux *Ngamux) Post(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(buildRoute(url, http.MethodPost, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodPost, handler, middlewares...))
 		return
 	}
 	mux.addRoute(buildRoute(url, http.MethodPost, handler, mux.middlewares...))
 }
 
 // Patch register route for a url with Patch request method
-func (mux *Ngamux) Patch(url string, handler http.HandlerFunc) {
+func (mux *Ngamux) Patch(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(buildRoute(url, http.MethodPatch, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodPatch, handler, middlewares...))
 		return
 	}
 	mux.addRoute(buildRoute(url, http.MethodPatch, handler, mux.middlewares...))
 }
 
 // Put register route for a url with Put request method
-func (mux *Ngamux) Put(url string, handler http.HandlerFunc) {
+func (mux *Ngamux) Put(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(buildRoute(url, http.MethodPut, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodPut, handler, middlewares...))
 		return
 	}
 	mux.addRoute(buildRoute(url, http.MethodPut, handler, mux.middlewares...))
 }
 
 // Delete register route for a url with Delete request method
-func (mux *Ngamux) Delete(url string, handler http.HandlerFunc) {
+func (mux *Ngamux) Delete(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	if mux.parent != nil {
-		mux.addRouteFromGroup(buildRoute(url, http.MethodDelete, handler))
+		mux.addRouteFromGroup(buildRoute(url, http.MethodDelete, handler, middlewares...))
 		return
 	}
 	mux.addRoute(buildRoute(url, http.MethodDelete, handler, mux.middlewares...))
 }
 
 // All register route for a url with any request method
-func (mux *Ngamux) All(url string, handler http.HandlerFunc) {
+func (mux *Ngamux) All(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	for _, method := range allMethods {
 		if mux.parent != nil {
-			mux.addRouteFromGroup(buildRoute(url, method, handler))
+			mux.addRouteFromGroup(buildRoute(url, method, handler, middlewares...))
 			return
 		}
 

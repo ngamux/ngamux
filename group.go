@@ -5,11 +5,10 @@ import (
 )
 
 // Group returns new nested ngamux object
-func (mux *Ngamux) Group(url string, middlewares ...MiddlewareFunc) *Ngamux {
+func (mux *Ngamux) Group(url string) *Ngamux {
 	group := &Ngamux{
-		parent:      mux,
-		path:        url,
-		middlewares: middlewares,
+		parent: mux,
+		path:   url,
 	}
 	return group
 }

@@ -6,12 +6,12 @@ import (
 
 type Router interface {
 	getPath() string
-	HandleFunc(string, string, http.HandlerFunc)
-	Get(string, http.HandlerFunc)
-	Post(string, http.HandlerFunc)
-	Put(string, http.HandlerFunc)
-	Patch(string, http.HandlerFunc)
-	Delete(string, http.HandlerFunc)
+	HandleFunc(string, string, http.HandlerFunc, ...MiddlewareFunc)
+	Get(string, http.HandlerFunc, ...MiddlewareFunc)
+	Post(string, http.HandlerFunc, ...MiddlewareFunc)
+	Put(string, http.HandlerFunc, ...MiddlewareFunc)
+	Patch(string, http.HandlerFunc, ...MiddlewareFunc)
+	Delete(string, http.HandlerFunc, ...MiddlewareFunc)
 }
 
 type Annotation struct {
@@ -37,27 +37,27 @@ func (a *Annotation) annotate(method, path string, handler http.HandlerFunc) {
 	}
 }
 
-func (a *Annotation) HandlerFunc(method, path string, handler http.HandlerFunc) {
+func (a *Annotation) HandleFunc(method, path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	a.annotate(method, path, handler)
-	a.Mux.HandleFunc(method, path, handler)
+	a.Mux.HandleFunc(method, path, handler, middlewares...)
 }
-func (a *Annotation) Get(path string, handler http.HandlerFunc) {
+func (a *Annotation) Get(path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	a.annotate(http.MethodGet, path, handler)
-	a.Mux.Get(path, handler)
+	a.Mux.Get(path, handler, middlewares...)
 }
-func (a *Annotation) Post(path string, handler http.HandlerFunc) {
+func (a *Annotation) Post(path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	a.annotate(http.MethodPost, path, handler)
-	a.Mux.Post(path, handler)
+	a.Mux.Post(path, handler, middlewares...)
 }
-func (a *Annotation) Put(path string, handler http.HandlerFunc) {
+func (a *Annotation) Put(path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	a.annotate(http.MethodPut, path, handler)
-	a.Mux.Put(path, handler)
+	a.Mux.Put(path, handler, middlewares...)
 }
-func (a *Annotation) Patch(path string, handler http.HandlerFunc) {
+func (a *Annotation) Patch(path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	a.annotate(http.MethodPatch, path, handler)
-	a.Mux.Patch(path, handler)
+	a.Mux.Patch(path, handler, middlewares...)
 }
-func (a *Annotation) Delete(path string, handler http.HandlerFunc) {
+func (a *Annotation) Delete(path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	a.annotate(http.MethodDelete, path, handler)
-	a.Mux.Delete(path, handler)
+	a.Mux.Delete(path, handler, middlewares...)
 }
