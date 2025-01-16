@@ -49,7 +49,7 @@ func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerF
 	}
 
 	route := fmt.Sprintf("%s %s", method, path)
-	h.mux.HandleFunc(route, WithMiddlewares(h.middlewares...)(handlerFunc))
+	h.mux.HandleFunc(route, WithMiddlewares(append(h.middlewares, middlewares...)...)(handlerFunc))
 }
 
 func (h *HttpServeMux) Group(path string) *HttpServeMux {

@@ -121,7 +121,7 @@ func (mux *Ngamux) Get(url string, handler http.HandlerFunc, middlewares ...Midd
 		mux.addRouteFromGroup(buildRoute(url, http.MethodGet, handler, middlewares...))
 		return
 	}
-	mux.addRoute(buildRoute(url, http.MethodGet, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodGet, handler, append(mux.middlewares, middlewares...)...))
 }
 
 // Head register route for a url with Head request method
@@ -130,7 +130,7 @@ func (mux *Ngamux) Head(url string, handler http.HandlerFunc, middlewares ...Mid
 		mux.addRouteFromGroup(buildRoute(url, http.MethodHead, handler, middlewares...))
 		return
 	}
-	mux.addRoute(buildRoute(url, http.MethodHead, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodHead, handler, append(mux.middlewares, middlewares...)...))
 }
 
 // Post register route for a url with Post request method
@@ -139,7 +139,7 @@ func (mux *Ngamux) Post(url string, handler http.HandlerFunc, middlewares ...Mid
 		mux.addRouteFromGroup(buildRoute(url, http.MethodPost, handler, middlewares...))
 		return
 	}
-	mux.addRoute(buildRoute(url, http.MethodPost, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodPost, handler, append(mux.middlewares, middlewares...)...))
 }
 
 // Patch register route for a url with Patch request method
@@ -148,7 +148,7 @@ func (mux *Ngamux) Patch(url string, handler http.HandlerFunc, middlewares ...Mi
 		mux.addRouteFromGroup(buildRoute(url, http.MethodPatch, handler, middlewares...))
 		return
 	}
-	mux.addRoute(buildRoute(url, http.MethodPatch, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodPatch, handler, append(mux.middlewares, middlewares...)...))
 }
 
 // Put register route for a url with Put request method
@@ -157,7 +157,7 @@ func (mux *Ngamux) Put(url string, handler http.HandlerFunc, middlewares ...Midd
 		mux.addRouteFromGroup(buildRoute(url, http.MethodPut, handler, middlewares...))
 		return
 	}
-	mux.addRoute(buildRoute(url, http.MethodPut, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodPut, handler, append(mux.middlewares, middlewares...)...))
 }
 
 // Delete register route for a url with Delete request method
@@ -166,7 +166,7 @@ func (mux *Ngamux) Delete(url string, handler http.HandlerFunc, middlewares ...M
 		mux.addRouteFromGroup(buildRoute(url, http.MethodDelete, handler, middlewares...))
 		return
 	}
-	mux.addRoute(buildRoute(url, http.MethodDelete, handler, mux.middlewares...))
+	mux.addRoute(buildRoute(url, http.MethodDelete, handler, append(mux.middlewares, middlewares...)...))
 }
 
 // All register route for a url with any request method
@@ -177,7 +177,7 @@ func (mux *Ngamux) All(url string, handler http.HandlerFunc, middlewares ...Midd
 			return
 		}
 
-		mux.addRoute(buildRoute(url, method, handler, mux.middlewares...))
+		mux.addRoute(buildRoute(url, method, handler, append(mux.middlewares, middlewares...)...))
 	}
 }
 
