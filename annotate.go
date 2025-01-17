@@ -12,6 +12,7 @@ type Router interface {
 	Put(string, http.HandlerFunc, ...MiddlewareFunc)
 	Patch(string, http.HandlerFunc, ...MiddlewareFunc)
 	Delete(string, http.HandlerFunc, ...MiddlewareFunc)
+	All(string, http.HandlerFunc, ...MiddlewareFunc)
 }
 
 type Annotation struct {
@@ -58,6 +59,10 @@ func (a *Annotation) Patch(path string, handler http.HandlerFunc, middlewares ..
 	a.Mux.Patch(path, handler, middlewares...)
 }
 func (a *Annotation) Delete(path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
+	a.annotate(http.MethodDelete, path, handler)
+	a.Mux.Delete(path, handler, middlewares...)
+}
+func (a *Annotation) All(path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	a.annotate(http.MethodDelete, path, handler)
 	a.Mux.Delete(path, handler, middlewares...)
 }

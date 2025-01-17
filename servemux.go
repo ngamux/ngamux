@@ -82,6 +82,10 @@ func (h *HttpServeMux) Delete(path string, handlerFunc http.HandlerFunc, middlew
 	h.HandleFunc(http.MethodDelete, path, handlerFunc, middlewares...)
 }
 
+func (h *HttpServeMux) All(path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
+	h.HandleFunc("", path, handlerFunc, middlewares...)
+}
+
 //	func (mux *HttpServeMux) getParent() Router {
 //		return mux.parent
 //	}
