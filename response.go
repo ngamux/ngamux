@@ -72,11 +72,3 @@ func (r *Response) HTML(path string, data any) {
 		return
 	}
 }
-
-type readOnlyResponseWriter struct {
-	http.ResponseWriter
-}
-
-func (r readOnlyResponseWriter) Write(data []byte) (int, error) {
-	return 0, nil
-}

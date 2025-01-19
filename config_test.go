@@ -11,7 +11,6 @@ func TestBuildConfig(t *testing.T) {
 	result := NewConfig()
 	expected := Config{
 		RemoveTrailingSlash: true,
-		GlobalErrorHandler:  globalErrorHandler,
 	}
 	must.Equal(expected.RemoveTrailingSlash, result.RemoveTrailingSlash)
 }

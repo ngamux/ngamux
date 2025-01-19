@@ -1,11 +1,8 @@
 package ngamux
 
-import "net/http"
-
 // Config define ngamux global configuration
 type Config struct {
 	RemoveTrailingSlash bool
-	GlobalErrorHandler  http.HandlerFunc
 	LogLevel            LogLevel
 }
 
@@ -13,7 +10,6 @@ type Config struct {
 func NewConfig() Config {
 	config := Config{
 		RemoveTrailingSlash: true,
-		GlobalErrorHandler:  globalErrorHandler,
 		LogLevel:            LogLevelError,
 	}
 

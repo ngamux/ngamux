@@ -14,13 +14,6 @@ func TestOptions(t *testing.T) {
 		must.False(mux.config.RemoveTrailingSlash)
 	})
 
-	t.Run("set GlobalErrorHandler", func(t *testing.T) {
-		must := must.New(t)
-
-		mux := New(WithErrorHandler(globalErrorHandler))
-		must.NotNil(mux.config.GlobalErrorHandler)
-	})
-
 	t.Run("set LogLevel", func(t *testing.T) {
 		must := must.New(t)
 
