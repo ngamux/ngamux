@@ -59,6 +59,7 @@ func (mux *Ngamux) HandleFunc(method, path string, handler http.HandlerFunc, mid
 	}
 
 	parent := mux.parent
+	path = gopath.Join(mux.path, path)
 	for parent != nil {
 		path = gopath.Join(parent.path, path)
 		middlewares = append(parent.middlewares, middlewares...)
