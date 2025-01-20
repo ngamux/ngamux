@@ -1,57 +1,40 @@
 package ngamux
 
 import (
+	"context"
 	"fmt"
+	"log/slog"
 )
 
-type LogLevel int
+const LogLevelQuiet slog.Level = -8
 
-const (
-	LogLevelQuiet LogLevel = iota
-	LogLevelInfo
-	LogLevelWarn
-	LogLevelError
-)
-
-func (l LogLevel) String() string {
-	switch l {
-	case 0:
-		return "QUIET"
-	case 1:
-		return "INFO"
-	case 2:
-		return "WARN"
-	case 3:
-		return "ERRO"
-	}
-
-	return ""
-}
-
-func (m Ngamux) isLogCanShow(level LogLevel) bool {
+func (m Ngamux) isLogCanShow(level slog.Level) bool {
 	if m.config.LogLevel == LogLevelQuiet {
 		return false
 	}
 
-	if m.config.LogLevel == LogLevelInfo && level == LogLevelInfo {
+	if m.config.LogLevel == slog.LevelInfo && level == slog.LevelInfo {
 		return true
 	}
 
-	if (m.config.LogLevel == LogLevelWarn && level == LogLevelInfo) || (m.config.LogLevel == LogLevelWarn && level == LogLevelWarn) {
+	if (m.config.LogLevel == slog.LevelWarn && level == slog.LevelInfo) ||
+		(m.config.LogLevel == slog.LevelWarn && level == slog.LevelWarn) {
 		return true
 	}
 
-	if (m.config.LogLevel == LogLevelError && level == LogLevelInfo) || (m.config.LogLevel == LogLevelError && level == LogLevelWarn) || (m.config.LogLevel == LogLevelError && level == LogLevelError) {
+	if (m.config.LogLevel == slog.LevelError && level == slog.LevelInfo) ||
+		(m.config.LogLevel == slog.LevelError && level == slog.LevelWarn) ||
+		(m.config.LogLevel == slog.LevelError && level == slog.LevelError) {
 		return true
 	}
 
 	return false
 }
 
-func (m Ngamux) Log(level LogLevel, message string, data ...any) {
+func (m Ngamux) Log(level slog.Level, message string, data ...any) {
 	if !m.isLogCanShow(level) {
 		return
 	}
 
-	fmt.Printf(fmt.Sprintf("[%s] %s\n", level, message), data...)
+	slog.Default().Log(context.Background(), level, fmt.Sprintf("[%s] %s\n", level, message), data...)
 }
