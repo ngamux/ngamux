@@ -6,6 +6,14 @@ import (
 	"github.com/golang-must/must"
 )
 
+func TestLogConstants(t *testing.T) {
+	must.Equal(t, LogLevelQuiet.String(), "QUIET")
+	must.Equal(t, LogLevelInfo.String(), "INFO")
+	must.Equal(t, LogLevelWarn.String(), "WARN")
+	must.Equal(t, LogLevelError.String(), "ERRO")
+	must.Equal(t, LogLevel(-1).String(), "")
+}
+
 func TestIsLogCanShow(t *testing.T) {
 	t.Run("quiet", func(t *testing.T) {
 		must := must.New(t)

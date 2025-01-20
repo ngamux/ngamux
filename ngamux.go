@@ -79,10 +79,23 @@ func (mux *Ngamux) Get(url string, handler http.HandlerFunc, middlewares ...Midd
 	mux.HandleFunc(http.MethodGet, url, handler, middlewares...)
 }
 
+type headResponseWriter struct {
+	http.ResponseWriter
+}
+
+func (headResponseWriter) Write(in []byte) (int, error) {
+	return 0, nil
+}
+
 // Head register route for a url with Head request method
 func (mux *Ngamux) Head(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
-	mux.HandleFunc(http.MethodHead, url, handler, middlewares...)
+	mux.HandleFunc(
+		http.MethodHead,
+		url,
+		func(w http.ResponseWriter, r *http.Request) { handler(headResponseWriter{w}, r) },
+		middlewares...,
+	)
 }
 
 // Post register route for a url with Post request method

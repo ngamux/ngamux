@@ -73,23 +73,23 @@ func TestGet(t *testing.T) {
 
 }
 
-// func TestHead(t *testing.T) {
-// 	must := must.New(t)
-// 	mux := New(
-// 		WithLogLevel(LogLevelQuiet),
-// 	)
-// 	mux.Head("/", func(rw http.ResponseWriter, r *http.Request) {
-// 		Res(rw).Text("ok")
-// 	})
-//
-// 	rec := httptest.NewRecorder()
-// 	req := httptest.NewRequest(http.MethodHead, "/", nil)
-// 	mux.ServeHTTP(rec, req)
-//
-// 	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
-// 	expected := ""
-// 	must.Equal(expected, result)
-// }
+func TestHead(t *testing.T) {
+	must := must.New(t)
+	mux := New(
+		WithLogLevel(LogLevelQuiet),
+	)
+	mux.Head("/", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodHead, "/", nil)
+	mux.ServeHTTP(rec, req)
+
+	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+	expected := ""
+	must.Equal(expected, result)
+}
 
 func TestPost(t *testing.T) {
 	must := must.New(t)
@@ -184,41 +184,57 @@ func TestAll(t *testing.T) {
 	}
 }
 
-// func TestWith(t *testing.T) {
-// 	must := must.New(t)
-// 	mux := New(
-// 		WithLogLevel(LogLevelQuiet),
-// 	)
-// 	mux = mux.With(func(next http.HandlerFunc) http.HandlerFunc {
-// 		return func(rw http.ResponseWriter, r *http.Request) {
-// 			next(rw, r)
-// 		}
-// 	})
-// 	must.NotNil(mux)
-// 	must.NotNil(mux.parent)
-// }
+func TestHandle(t *testing.T) {
+	must := must.New(t)
+	mux := New(
+		WithLogLevel(LogLevelQuiet),
+	)
+	mux.Handle("/", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
+	}))
 
-// func TestMount(t *testing.T) {
-// 	must := must.New(t)
-// 	mux := New(
-// 		WithLogLevel(LogLevelQuiet),
-// 	)
-// 	mux2 := New(
-// 		WithLogLevel(LogLevelQuiet),
-// 	)
-// 	mux2.Get("/", func(rw http.ResponseWriter, r *http.Request) {
-// 		Res(rw).Text("ok")
-// 	})
-// 	mux.Mount("/users", mux2)
-//
-// 	rec := httptest.NewRecorder()
-// 	req := httptest.NewRequest(http.MethodGet, "/users", nil)
-// 	mux.ServeHTTP(rec, req)
-//
-// 	result := strings.ReplaceAll(rec.Body.String(), "\n", "")
-// 	expected := "ok"
-// 	must.Equal(expected, result)
-// }
+	methods := []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete}
+	for _, method := range methods {
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(method, "/", nil)
+		mux.ServeHTTP(rec, req)
+
+		result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+		expected := "ok"
+		must.Equal(expected, result)
+	}
+
+	{
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/cats", nil)
+		mux.ServeHTTP(rec, req)
+
+		result := strings.ReplaceAll(rec.Body.String(), "\n", "")
+		expected := "404 page not found"
+		must.Equal(expected, result)
+	}
+}
+
+func TestWith(t *testing.T) {
+	must := must.New(t)
+	mux := New(
+		WithLogLevel(LogLevelQuiet),
+	)
+
+	{
+		mux1 := mux.With(func(next http.HandlerFunc) http.HandlerFunc {
+			return func(rw http.ResponseWriter, r *http.Request) {
+				next(rw, r)
+			}
+		}, func(next http.HandlerFunc) http.HandlerFunc {
+			return func(rw http.ResponseWriter, r *http.Request) {
+				next(rw, r)
+			}
+		})
+		must.NotNil(mux1)
+		must.NotNil(mux1.parent)
+	}
+}
 
 func BenchmarkNgamux(b *testing.B) {
 	h1 := func(w http.ResponseWriter, r *http.Request) {}

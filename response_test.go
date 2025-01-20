@@ -42,14 +42,26 @@ func TestResText(t *testing.T) {
 func TestResJSON(t *testing.T) {
 	must := must.New(t)
 	expected := `{"id":1}`
-	result := httptest.NewRecorder()
-	r := Res(result)
-	r.JSON(Map{
-		"id": 1,
-	})
+	{
+		result := httptest.NewRecorder()
+		r := Res(result)
+		r.JSON(Map{
+			"id": 1,
+		})
 
-	must.Equal(r.status, 0)
-	must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
+		must.Equal(r.status, 0)
+		must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
+	}
+	{
+		result := httptest.NewRecorder()
+		r := Res(result)
+		r.JSON(Map{
+			"id": must.Equal,
+		})
+
+		must.Equal(r.status, 0)
+		must.Equal("json: unsupported type: func(interface {}, interface {})", strings.ReplaceAll(result.Body.String(), "\n", ""))
+	}
 }
 
 func TestResHtml(t *testing.T) {
