@@ -1,9 +1,13 @@
 package ngamux
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -184,4 +188,30 @@ func TestQueriesParser(t *testing.T) {
 
 		must.Equal(qs.FieldNotValid, nil)
 	})
+}
+
+func TestFormFile(t *testing.T) {
+	file, err := os.CreateTemp("", "testfile-*.txt")
+	if err != nil {
+		t.Fatalf("could not create temp file: %v", err)
+	}
+	defer os.Remove(file.Name())
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", file.Name())
+	must.Nil(t, err)
+
+	_, err = io.Copy(part, file)
+	must.Nil(t, err)
+
+	err = writer.Close()
+	must.Nil(t, err)
+
+	req := httptest.NewRequest(http.MethodPost, "/", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	headers, err := Req(req).FormFile("file", 1)
+	must.Nil(t, err)
+	must.True(t, strings.HasSuffix(file.Name(), headers.Filename))
 }
