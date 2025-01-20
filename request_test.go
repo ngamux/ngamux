@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -79,12 +80,30 @@ func TestJSON(t *testing.T) {
 }
 
 func TestFormValue(t *testing.T) {
+	t.Run("positive", func(t *testing.T) {
+		input := url.Values{}
+		input.Set("iknow", "1")
+
+		must := must.New(t)
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(input.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		result := Req(req).FormValue("iknow")
+		must.Equal("1", result)
+	})
 
 	t.Run("can supply default value", func(t *testing.T) {
 		must := must.New(t)
 		req := Req(httptest.NewRequest(http.MethodPost, "/", strings.NewReader("")))
 		result := req.FormValue("idontknow", "1")
 		must.Equal("1", result)
+	})
+
+	t.Run("no default value", func(t *testing.T) {
+		must := must.New(t)
+		req := Req(httptest.NewRequest(http.MethodPost, "/", strings.NewReader("")))
+		result := req.FormValue("idontknow")
+		must.Equal("", result)
 	})
 }
 
