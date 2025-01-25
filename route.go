@@ -18,6 +18,7 @@ type (
 
 	Node struct {
 		key      string
+		path     []byte
 		param    string
 		handler  http.Handler
 		children map[string]*Node
@@ -34,7 +35,12 @@ func (t *Ngamux) Handle(key string, handler http.Handler) {
 func (t *Ngamux) handle(key string, handler http.Handler) {
 	current := t.root
 	keys := strings.Split(key, "/")
-	for _, k := range keys {
+	path := []byte{}
+	for i, k := range keys {
+		if i > 0 {
+			path = append(path, '/')
+			path = append(path, []byte(k)...)
+		}
 		isWildcard := strings.HasPrefix(k, "{") && strings.HasSuffix(k, "}")
 		var param string
 		if isWildcard {
@@ -48,32 +54,24 @@ func (t *Ngamux) handle(key string, handler http.Handler) {
 		current = current.children[k]
 	}
 	current.handler = handler
+	current.path = path
 }
 
 func (t Ngamux) match(key string, params map[string]string) (http.Handler, string) {
-	pattern := strings.Builder{}
 	current := t.root
 	keys := strings.Split(key, "/")
 	for _, k := range keys {
 		if _, ok := current.children[k]; ok {
 			current = current.children[k]
-			pattern.WriteString("/")
-			pattern.WriteString(k)
 		} else if _, ok := current.children["{}"]; ok {
 			current = current.children["{}"]
 			params[current.param] = k
-
-			pattern.WriteString("/")
-			pattern.WriteString("{")
-			pattern.WriteString(current.param)
-			pattern.WriteString("}")
 		} else {
 			return nil, ""
 		}
 	}
 
-	_, pattern1, _ := strings.Cut(pattern.String(), " ")
-	return current.handler, pattern1
+	return current.handler, string(current.path)
 }
 
 func (t Ngamux) Handler(r *http.Request) (http.Handler, string) {
