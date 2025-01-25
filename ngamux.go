@@ -22,7 +22,7 @@ const (
 )
 
 type Ngamux struct {
-	root        *Node
+	root        map[string]*Node
 	middlewares []MiddlewareFunc
 	config      *Config
 	path        string
@@ -35,7 +35,7 @@ func New(opts ...func(*Config)) *Ngamux {
 		opt(&config)
 	}
 	return &Ngamux{
-		root:        &Node{key: "", children: make(map[string]*Node)},
+		root:        map[string]*Node{},
 		middlewares: make([]MiddlewareFunc, 0),
 		config:      &config,
 	}

@@ -1,6 +1,7 @@
 package ngamux
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -32,8 +33,24 @@ func (t *Ngamux) Handle(key string, handler http.Handler) {
 	t.handle(key, handler)
 }
 
+func splitMethodPath(path string) (string, string) {
+	paths := strings.Split(path, " ")
+	method := "ALL"
+	if len(path) > 1 {
+		method = paths[0]
+		path = paths[1]
+	}
+	return method, path
+}
+
 func (t *Ngamux) handle(key string, handler http.Handler) {
-	current := t.root
+	method, key := splitMethodPath(key)
+	current, ok := t.root[method]
+	if !ok {
+		current = &Node{key: "", children: make(map[string]*Node)}
+		t.root[method] = current
+	}
+
 	keys := strings.Split(key, "/")
 	path := []byte{}
 	for i, k := range keys {
@@ -58,7 +75,24 @@ func (t *Ngamux) handle(key string, handler http.Handler) {
 }
 
 func (t Ngamux) match(key string, params map[string]string) (http.Handler, string) {
-	current := t.root
+	method, key := splitMethodPath(key)
+	current, ok := t.root[method]
+	if !ok {
+		for k, node := range t.root {
+			handler, _ := matchNode(node, key, params)
+			if handler != nil && k != "ALL" {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					fmt.Fprintf(w, "%d method not allowed\n", http.StatusMethodNotAllowed)
+				}), ""
+			}
+		}
+		return nil, ""
+	}
+
+	return matchNode(current, key, params)
+}
+
+func matchNode(current *Node, key string, params map[string]string) (http.Handler, string) {
 	keys := strings.Split(key, "/")
 	for _, k := range keys {
 		if _, ok := current.children[k]; ok {
