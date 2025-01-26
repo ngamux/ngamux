@@ -11,6 +11,8 @@ import (
 	"net/http"
 	gopath "path"
 	"slices"
+
+	"github.com/ngamux/ngamux/mapping"
 )
 
 // KeyContext describe key type for ngamux context
@@ -22,7 +24,7 @@ const (
 )
 
 type Ngamux struct {
-	root        map[string]*Node
+	root        mapping.Mapping[string, *Node]
 	middlewares []MiddlewareFunc
 	config      *Config
 	path        string
@@ -35,7 +37,7 @@ func New(opts ...func(*Config)) *Ngamux {
 		opt(&config)
 	}
 	return &Ngamux{
-		root:        map[string]*Node{},
+		root:        mapping.New[string, *Node](),
 		middlewares: make([]MiddlewareFunc, 0),
 		config:      &config,
 	}

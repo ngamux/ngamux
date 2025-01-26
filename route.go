@@ -45,10 +45,10 @@ func splitMethodPath(path string) (string, string) {
 
 func (t *Ngamux) handle(key string, handler http.Handler) {
 	method, key := splitMethodPath(key)
-	current, ok := t.root[method]
+	current, ok := t.root.Get(method)
 	if !ok {
 		current = &Node{key: "", children: make(map[string]*Node)}
-		t.root[method] = current
+		t.root.Set(method, current)
 	}
 
 	keys := strings.Split(key, "/")
@@ -74,25 +74,27 @@ func (t *Ngamux) handle(key string, handler http.Handler) {
 	current.path = path
 }
 
-func (t Ngamux) match(key string, params map[string]string) (http.Handler, string) {
+func (t Ngamux) match(key string, params map[string]string, handler *http.Handler, pattern *string) {
 	method, key := splitMethodPath(key)
-	current, ok := t.root[method]
+	current, ok := t.root.Get(method)
 	if !ok {
-		for k, node := range t.root {
-			handler, _ := matchNode(node, key, params)
+		t.root.each(func(k string, n *Node) bool {
+			matchNode(n, key, params, handler, pattern)
 			if handler != nil && k != "ALL" {
-				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				*handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					fmt.Fprintf(w, "%d method not allowed\n", http.StatusMethodNotAllowed)
-				}), ""
+				})
+				return false
 			}
-		}
-		return nil, ""
+			return true
+		})
+		return
 	}
 
-	return matchNode(current, key, params)
+	matchNode(current, key, params, handler, pattern)
 }
 
-func matchNode(current *Node, key string, params map[string]string) (http.Handler, string) {
+func matchNode(current *Node, key string, params map[string]string, handler *http.Handler, pattern *string) {
 	keys := strings.Split(key, "/")
 	for _, k := range keys {
 		if _, ok := current.children[k]; ok {
@@ -101,16 +103,19 @@ func matchNode(current *Node, key string, params map[string]string) (http.Handle
 			current = current.children["{}"]
 			params[current.param] = k
 		} else {
-			return nil, ""
+			return
 		}
 	}
 
-	return current.handler, string(current.path)
+	*handler = current.handler
+	*pattern = string(current.path)
 }
 
 func (t Ngamux) Handler(r *http.Request) (http.Handler, string) {
 	params := make(map[string]string)
-	handler, pattern := t.match(r.Method+" "+r.URL.Path, params)
+	var handler http.Handler
+	var pattern string
+	t.match(r.Method+" "+r.URL.Path, params, &handler, &pattern)
 	if handler == nil {
 		return nil, ""
 	}
