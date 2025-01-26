@@ -78,7 +78,7 @@ func (t Ngamux) match(key string, params map[string]string, handler *http.Handle
 	method, key := splitMethodPath(key)
 	current, ok := t.root.Get(method)
 	if !ok {
-		t.root.each(func(k string, n *Node) bool {
+		t.root.Each(func(k string, n *Node) bool {
 			matchNode(n, key, params, handler, pattern)
 			if handler != nil && k != "ALL" {
 				*handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

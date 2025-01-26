@@ -46,7 +46,7 @@ func (mapp *Mapping[K, V]) Get(k K) (v V, ok bool) {
 	return v, ok
 }
 
-func (mapp *Mapping[K, V]) each(fn func(k K, v V) bool) {
+func (mapp *Mapping[K, V]) Each(fn func(k K, v V) bool) {
 	if mapp.m != nil {
 		for k, v := range mapp.m {
 			if !fn(k, v) {
