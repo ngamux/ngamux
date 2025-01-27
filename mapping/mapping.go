@@ -17,7 +17,18 @@ func New[K comparable, V any]() Mapping[K, V] {
 
 func (mapp *Mapping[K, V]) Set(k K, v V) {
 	if mapp.m == nil && len(mapp.s) < maxSlice {
-		mapp.s = append(mapp.s, mappingEntry[K, V]{k, v})
+		found := -1
+		for i, e := range mapp.s {
+			if e.k == k {
+				found = i
+				break
+			}
+		}
+		if found <= -1 {
+			mapp.s = append(mapp.s, mappingEntry[K, V]{k, v})
+			return
+		}
+		mapp.s[found] = mappingEntry[K, V]{k, v}
 		return
 	}
 
