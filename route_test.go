@@ -47,4 +47,14 @@ func TestGetRoute(t *testing.T) {
 	handler2, pattern2 := mux.Handler(req2)
 	must.Nil(handler2)
 	must.Equal("", pattern2)
+
+	req3 := httptest.NewRequest(http.MethodDelete, "/", nil)
+	rec3 := httptest.NewRecorder()
+	handler3, pattern3 := mux.Handler(req3)
+	must.NotNil(handler3)
+	must.Equal("/", pattern3)
+	handler3.ServeHTTP(rec3, req3)
+	result3 := strings.ReplaceAll(rec3.Body.String(), "\n", "")
+	expected3 := "405 method not allowed"
+	must.Equal(expected3, result3)
 }
