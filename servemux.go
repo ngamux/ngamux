@@ -62,6 +62,11 @@ func (h *HttpServeMux) Group(path string) *HttpServeMux {
 	return res
 }
 
+func (h *HttpServeMux) GroupFunc(path string, router func(mux *HttpServeMux)) {
+	group := h.Group(path)
+	router(group)
+}
+
 func (h *HttpServeMux) Get(path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	h.HandleFunc(http.MethodGet, path, handlerFunc, middlewares...)
 }

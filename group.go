@@ -8,6 +8,11 @@ func (mux *Ngamux) Group(url string) *Ngamux {
 	return group
 }
 
+func (h *Ngamux) GroupFunc(path string, router func(mux *Ngamux)) {
+	group := h.Group(path)
+	router(group)
+}
+
 // func (mux *Ngamux) addRouteFromGroup(route Route) {
 // 	url := path.Join(mux.path, route.Path)
 // 	middlewares := mux.middlewares
