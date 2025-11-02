@@ -3,6 +3,7 @@ package ngamux
 import (
 	"fmt"
 	"net/http"
+	gopath "path"
 	"slices"
 )
 
@@ -37,19 +38,26 @@ func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
-	middlewares = append(h.middlewares, middlewares...)
-	if h.parent != nil {
-		if path == "/" {
-			path = ""
-		}
-		route := fmt.Sprintf("%s %s%s", method, h.path, path)
-		middlewares := append(h.parent.middlewares, middlewares...)
-		h.parent.mux.Handle(route, WithMiddlewares(middlewares...)(handlerFunc))
+	if h.parent == nil {
+		route := fmt.Sprintf("%s %s", method, path)
+		middlewares = append(h.middlewares, middlewares...)
+		h.mux.HandleFunc(route, WithMiddlewares(middlewares...)(handlerFunc))
 		return
 	}
 
-	route := fmt.Sprintf("%s %s", method, path)
-	h.mux.HandleFunc(route, WithMiddlewares(append(h.middlewares, middlewares...)...)(handlerFunc))
+	parent := h
+	paths := []string{path}
+	for {
+		paths = append([]string{parent.path}, paths...)
+		middlewares = append(parent.middlewares, middlewares...)
+
+		if parent.parent == nil {
+			break
+		}
+		parent = parent.parent
+	}
+	route := fmt.Sprintf("%s %s", method, gopath.Join(paths...))
+	parent.mux.HandleFunc(route, WithMiddlewares(middlewares...)(handlerFunc))
 }
 
 func (h *HttpServeMux) Group(path string) *HttpServeMux {
