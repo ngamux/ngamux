@@ -87,3 +87,11 @@ func TestResHtml(t *testing.T) {
 		must.Equal(expected, strings.ReplaceAll(result.Body.String(), "\n", ""))
 	})
 }
+
+func BenchmarkJSON(b *testing.B) {
+	res := Res(httptest.NewRecorder())
+	data := Map{"data": "ok"}
+	for b.Loop() {
+		res.JSON(data)
+	}
+}

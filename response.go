@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"maps"
 	"net/http"
 )
 
@@ -45,14 +46,19 @@ func (r *Response) Text(data string) {
 
 // JSON write application/json data with json encoded string as response body
 func (r *Response) JSON(data any) {
-	buf := &bytes.Buffer{}
+	buf := poolByte.Get().(*bytes.Buffer)
+	defer func() {
+		buf.Reset()
+		poolByte.Put(buf)
+	}()
+
 	enc := json.NewEncoder(buf)
 	if err := enc.Encode(data); err != nil {
 		http.Error(r, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	r.Header().Set("Content-Type", "application/json")
+	maps.Copy(r.Header(), headerContentTypeJSON)
 	r.WriteHeader(r.statusSafe())
 	_, _ = r.Write(buf.Bytes())
 }

@@ -8,9 +8,11 @@
 package ngamux
 
 import (
+	"bytes"
 	"net/http"
 	gopath "path"
 	"slices"
+	"sync"
 
 	"github.com/ngamux/ngamux/mapping"
 )
@@ -21,6 +23,16 @@ type KeyContext int
 const (
 	// KeyContextParams is key context for url params
 	KeyContextParams KeyContext = 1 << iota
+)
+
+var (
+	poolByte = sync.Pool{
+		New: func() any { return &bytes.Buffer{} },
+	}
+
+	headerContentTypeJSON = http.Header{
+		"Content-Type": []string{"application/json"},
+	}
 )
 
 type Ngamux struct {
