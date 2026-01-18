@@ -88,10 +88,17 @@ func TestResHtml(t *testing.T) {
 	})
 }
 
-func BenchmarkJSON(b *testing.B) {
+func BenchmarkResponseJSON(b *testing.B) {
 	res := Res(httptest.NewRecorder())
 	data := Map{"data": "ok"}
 	for b.Loop() {
 		res.JSON(data)
+	}
+}
+
+func BenchmarkResponseText(b *testing.B) {
+	res := Res(httptest.NewRecorder())
+	for b.Loop() {
+		res.Text(http.MethodGet)
 	}
 }

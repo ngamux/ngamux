@@ -33,6 +33,9 @@ var (
 	headerContentTypeJSON = http.Header{
 		"Content-Type": []string{"application/json"},
 	}
+	headerContentTypeText = http.Header{
+		"Content-Type": []string{"text/plain"},
+	}
 )
 
 type Ngamux struct {

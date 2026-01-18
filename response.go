@@ -3,7 +3,6 @@ package ngamux
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"maps"
 	"net/http"
@@ -40,8 +39,8 @@ func (r *Response) Status(status int) *Response {
 // Text writes text/plain data with simple string as response body
 func (r *Response) Text(data string) {
 	r.WriteHeader(r.statusSafe())
-	r.Header().Add("Content-Type", "text/plain")
-	_, _ = fmt.Fprintln(r, data)
+	maps.Copy(r.Header(), headerContentTypeText)
+	_, _ = r.Write([]byte(data))
 }
 
 // JSON write application/json data with json encoded string as response body
