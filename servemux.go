@@ -12,14 +12,21 @@ type HttpServeMux struct {
 	mux         *http.ServeMux
 	parent      *HttpServeMux
 	middlewares []MiddlewareFunc
+	config      *Config
 }
 
-func NewHttpServeMux() *HttpServeMux {
+func NewHttpServeMux(cfg ...*Config) *HttpServeMux {
+	if len(cfg) <= 0 {
+		c := NewConfig()
+		cfg = append(cfg, &c)
+	}
+
 	return &HttpServeMux{
 		"",
 		http.NewServeMux(),
 		nil,
 		make([]MiddlewareFunc, 0),
+		cfg[0],
 	}
 }
 
@@ -66,6 +73,7 @@ func (h *HttpServeMux) Group(path string) *HttpServeMux {
 		http.NewServeMux(),
 		h,
 		make([]MiddlewareFunc, 0),
+		h.config,
 	}
 	return res
 }
