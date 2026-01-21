@@ -2,14 +2,16 @@ package ngamux
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/ngamux/ngamux/json"
 )
 
 var (
@@ -171,7 +173,13 @@ func (r Request) FormFile(key string, maxFileSize ...int64) (*multipart.FileHead
 
 // JSON get json data from request body and store to variable reference
 func (r Request) JSON(store any) error {
-	if err := json.NewDecoder(r.Body).Decode(&store); err != nil {
+	rBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(rBody, &store)
+	if err != nil {
 		return err
 	}
 
