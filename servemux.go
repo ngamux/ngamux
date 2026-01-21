@@ -5,6 +5,8 @@ import (
 	"net/http"
 	gopath "path"
 	"slices"
+
+	"github.com/ngamux/ngamux/json"
 )
 
 type HttpServeMux struct {
@@ -20,6 +22,8 @@ func NewHttpServeMux(cfg ...*Config) *HttpServeMux {
 		c := NewConfig()
 		cfg = append(cfg, &c)
 	}
+
+	json.Configure(cfg[0].JSONMarshal, cfg[0].JSONUnmarshal)
 
 	return &HttpServeMux{
 		"",
