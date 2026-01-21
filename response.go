@@ -1,11 +1,11 @@
 package ngamux
 
 import (
-	"bytes"
-	"encoding/json"
 	"html/template"
 	"maps"
 	"net/http"
+
+	"github.com/ngamux/ngamux/json"
 )
 
 // Response define single response manager
@@ -45,21 +45,15 @@ func (r *Response) Text(data string) {
 
 // JSON write application/json data with json encoded string as response body
 func (r *Response) JSON(data any) {
-	buf := poolByte.Get().(*bytes.Buffer)
-	defer func() {
-		buf.Reset()
-		poolByte.Put(buf)
-	}()
-
-	enc := json.NewEncoder(buf)
-	if err := enc.Encode(data); err != nil {
+	b, err := json.Marshal(data)
+	if err != nil {
 		http.Error(r, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	maps.Copy(r.Header(), headerContentTypeJSON)
 	r.WriteHeader(r.statusSafe())
-	_, _ = r.Write(buf.Bytes())
+	_, _ = r.Write(b)
 }
 
 // HTML write text/html data with HTML string as response body
