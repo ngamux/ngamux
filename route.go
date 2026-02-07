@@ -82,7 +82,7 @@ func (t Ngamux) match(key string, params map[string]string, handler *http.Handle
 			matchNode(n, key, params, handler, pattern)
 			if handler != nil && k != "ALL" {
 				*handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					fmt.Fprintf(w, "%d method not allowed\n", http.StatusMethodNotAllowed)
+					_, _ = fmt.Fprintf(w, "%d method not allowed\n", http.StatusMethodNotAllowed)
 				})
 				return false
 			}

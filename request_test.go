@@ -214,7 +214,9 @@ func TestFormFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create temp file: %v", err)
 	}
-	defer os.Remove(file.Name())
+	defer func() {
+		_ = os.Remove(file.Name())
+	}()
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)

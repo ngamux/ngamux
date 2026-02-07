@@ -8,11 +8,9 @@
 package ngamux
 
 import (
-	"bytes"
 	"net/http"
 	gopath "path"
 	"slices"
-	"sync"
 
 	"github.com/ngamux/ngamux/mapping"
 )
@@ -26,10 +24,6 @@ const (
 )
 
 var (
-	poolByte = sync.Pool{
-		New: func() any { return &bytes.Buffer{} },
-	}
-
 	headerContentTypeJSON = http.Header{
 		"Content-Type": []string{"application/json"},
 	}

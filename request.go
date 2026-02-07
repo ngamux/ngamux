@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	unsupportedFieldType = errors.New("unsupported field type")
+	errUnsupportedFieldType = errors.New("unsupported field type")
 )
 
 // Request define single request manager
@@ -107,7 +107,7 @@ func setFieldValue(fieldValue reflect.Value, value string) error {
 		}
 		fieldValue.Set(nestedStruct)
 	default:
-		return unsupportedFieldType
+		return errUnsupportedFieldType
 	}
 	return nil
 }
@@ -166,7 +166,9 @@ func (r Request) FormFile(key string, maxFileSize ...int64) (*multipart.FileHead
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	return header, nil
 }
