@@ -15,11 +15,16 @@ import (
 	"github.com/ngamux/ngamux/mapping"
 )
 
-// KeyContext describe key type for ngamux context
+// KeyContext describes keys used when storing values in request contexts.
+// It is defined as an int-based type to avoid collisions with other
+// context keys from external packages.
 type KeyContext int
 
 const (
-	// KeyContextParams is key context for url params
+	// KeyContextParams is the context key under which route parameters
+	// (extracted during routing) are stored. The value associated with
+	// this key is [][]string where each element is a two-item slice
+	// [name, value]. Handlers can read parameters using Req(r).Params(name).
 	KeyContextParams KeyContext = 1 << iota
 )
 
@@ -40,6 +45,12 @@ type Ngamux struct {
 	parent      *Ngamux
 }
 
+// New constructs a new Ngamux router. Optionally pass functional
+// configuration options produced by functions in options.go, for example
+// ngamux.New(ngamux.WithTrailingSlash(), ngamux.WithLogLevel(slog.LevelInfo)).
+//
+// The returned *Ngamux is ready to register routes with methods like
+// Get, Post, or HandleFunc and can be used directly as an http.Handler.
 func New(opts ...func(*Config)) *Ngamux {
 	config := NewConfig()
 	for _, opt := range opts {
@@ -52,16 +63,27 @@ func New(opts ...func(*Config)) *Ngamux {
 	}
 }
 
-// Use register global middleware
+// Use registers middleware functions that will be applied to all routes
+// registered on this Ngamux instance (but not automatically applied to
+// parent groups). Middlewares are applied in the order they are added;
+// the execution order wraps handlers such that the most recently added
+// middleware runs first when a request is served.
 func (mux *Ngamux) Use(middlewares ...MiddlewareFunc) {
 	mux.middlewares = append(mux.middlewares, middlewares...)
 }
 
-// Config returns registered config (read only)
+// Config returns a copy of the active configuration for this router.
+// The returned Config is a value copy so callers cannot mutate the
+// router's configuration by accident.
 func (mux Ngamux) Config() Config {
 	return *mux.config
 }
 
+// HandleFunc registers a handler function for a given HTTP method and
+// path. Middlewares passed here are combined with middlewares registered
+// on this router and any parent groups. If this Ngamux is nested (created
+// via Group), the final path and middleware chain are composed by walking
+// the parent chain and joining path prefixes.
 func (mux *Ngamux) HandleFunc(method, path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	middlewares = append(mux.middlewares, middlewares...)
 	if mux.parent == nil {
@@ -84,7 +106,7 @@ func (mux *Ngamux) HandleFunc(method, path string, handler http.HandlerFunc, mid
 	parent.Handle(method+" "+path, WithMiddlewares(middlewares...)(handler))
 }
 
-// Get register route for a url with Get request method
+// Get registers a handler for GET requests on the provided URL.
 func (mux *Ngamux) Get(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
 	mux.HandleFunc(http.MethodGet, url, handler, middlewares...)
@@ -98,7 +120,9 @@ func (headResponseWriter) Write(in []byte) (int, error) {
 	return 0, nil
 }
 
-// Head register route for a url with Head request method
+// Head registers a handler for HEAD requests. It adapts the provided
+// handler by wrapping the ResponseWriter so that the body is suppressed
+// while headers and status codes are preserved.
 func (mux *Ngamux) Head(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
 	mux.HandleFunc(
@@ -109,36 +133,42 @@ func (mux *Ngamux) Head(url string, handler http.HandlerFunc, middlewares ...Mid
 	)
 }
 
-// Post register route for a url with Post request method
+// Post registers a handler for POST requests on the provided URL.
 func (mux *Ngamux) Post(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
 	mux.HandleFunc(http.MethodPost, url, handler, middlewares...)
 }
 
-// Patch register route for a url with Patch request method
+// Patch registers a handler for PATCH requests on the provided URL.
 func (mux *Ngamux) Patch(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
 	mux.HandleFunc(http.MethodPatch, url, handler, middlewares...)
 }
 
-// Put register route for a url with Put request method
+// Put registers a handler for PUT requests on the provided URL.
 func (mux *Ngamux) Put(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
 	mux.HandleFunc(http.MethodPut, url, handler, middlewares...)
 }
 
-// Delete register route for a url with Delete request method
+// Delete registers a handler for DELETE requests on the provided URL.
 func (mux *Ngamux) Delete(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
 	mux.HandleFunc(http.MethodDelete, url, handler, middlewares...)
 }
 
+// All registers a handler that accepts requests of any HTTP method for the
+// given URL. This is useful for endpoints that intentionally handle
+// multiple methods in a single function.
 func (mux *Ngamux) All(url string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
 	mux.HandleFunc("ALL", url, handler, middlewares...)
 }
 
-// With register middlewares and returns router
+// With creates a new sub-router (group) based on the current router's
+// path and registers the provided middlewares on that group. This is a
+// convenience for applying a short-lived middleware chain to a set of
+// routes.
 func (mux *Ngamux) With(middlewares ...MiddlewareFunc) *Ngamux {
 	group := mux.Group(mux.path)
 	group.Use(middlewares...)
