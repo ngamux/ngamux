@@ -9,6 +9,13 @@ import (
 	"github.com/ngamux/ngamux/json"
 )
 
+// HttpServeMux is a lightweight wrapper around the standard library's
+// http.ServeMux that adds support for middleware stacks and simple
+// subgrouping (nested groups with shared path prefixes and middlewares).
+//
+// This type is intentionally simpler than Ngamux and exists to provide a
+// convenience adapter for users who prefer the standard ServeMux behavior
+// but still want middleware support.
 type HttpServeMux struct {
 	path        string
 	mux         *http.ServeMux
@@ -17,6 +24,8 @@ type HttpServeMux struct {
 	config      *Config
 }
 
+// NewHttpServeMux constructs a new HttpServeMux. Optionally a Config can be
+// provided to override defaults (JSON marshalling, logging level, etc.).
 func NewHttpServeMux(cfg ...*Config) *HttpServeMux {
 	if len(cfg) <= 0 {
 		c := NewConfig()
@@ -34,10 +43,17 @@ func NewHttpServeMux(cfg ...*Config) *HttpServeMux {
 	}
 }
 
+// Use registers one or more middleware functions on this ServeMux group.
+// Middlewares registered on a group are applied to routes added to that
+// group (and to sub-groups when you register them via Group()).
 func (h *HttpServeMux) Use(middlewares ...MiddlewareFunc) {
 	h.middlewares = append(h.middlewares, middlewares...)
 }
 
+// ServeHTTP implements http.Handler. It delegates to the underlying
+// http.ServeMux but first checks whether a matching pattern exists. If no
+// route matches, registered middlewares will be applied to the
+// http.NotFound handler.
 func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_, pattern := h.mux.Handler(r)
 	if pattern == "" || (pattern == "GET /" && r.URL.Path != "/") {
@@ -47,6 +63,10 @@ func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.mux.ServeHTTP(w, r)
 }
 
+// HandleFunc registers a handler function for a method and path. If this
+// group has a parent, the effective path and middleware stack are built up
+// from parent groups so that nested groups inherit path prefixes and
+// middlewares.
 func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerFunc, middlewares ...MiddlewareFunc) {
 	slices.Reverse(middlewares)
 	if h.parent == nil {
@@ -71,6 +91,9 @@ func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerF
 	parent.mux.HandleFunc(route, WithMiddlewares(middlewares...)(handlerFunc))
 }
 
+// Group creates a nested HttpServeMux group with a path prefix. The new
+// group inherits configuration from the parent but can register its own
+// middlewares.
 func (h *HttpServeMux) Group(path string) *HttpServeMux {
 	res := &HttpServeMux{
 		path,
@@ -82,6 +105,8 @@ func (h *HttpServeMux) Group(path string) *HttpServeMux {
 	return res
 }
 
+// GroupFunc creates a group and invokes the provided router function so
+// the caller can register routes on the returned group inline.
 func (h *HttpServeMux) GroupFunc(path string, router func(mux *HttpServeMux)) {
 	group := h.Group(path)
 	router(group)
