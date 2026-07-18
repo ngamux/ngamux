@@ -32,10 +32,10 @@ import(
 
 func main() {
   mux := ngamux.New()
-  mux.Get("/", func(rw http.ResponseWriter, r *http.Request) error {
-    return ngamux.Res(rw).
+  mux.Get("/", func(rw http.ResponseWriter, r *http.Request)  {
+     ngamux.Res(rw).
       Status(http.StatusOK).
-      Json(ngamux.Map{
+      JSON(ngamux.Map{
         "message": "welcome!",
       })
   })
