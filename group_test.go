@@ -51,6 +51,59 @@ func TestGroup(t *testing.T) {
 	}
 }
 
+func TestWithNestedGroup(t *testing.T) {
+	must := must.New(t)
+	mux := New(WithLogLevel(LogLevelQuiet))
+	handler := func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("ok")
+	}
+
+	api := mux.Group("/api")
+	v1 := api.Group("/v1")
+	v1.Get("/users", handler)
+	v1.With(func(next http.HandlerFunc) http.HandlerFunc {
+		return next
+	}).Get("/posts", handler)
+
+	serve := func(path string) *httptest.ResponseRecorder {
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		mux.ServeHTTP(rec, req)
+		return rec
+	}
+
+	rec := serve("/api/v1/users")
+	must.Equal(http.StatusOK, rec.Code)
+	must.Equal("ok", strings.ReplaceAll(rec.Body.String(), "\n", ""))
+
+	rec = serve("/api/v1/posts")
+	must.Equal(http.StatusOK, rec.Code)
+	must.Equal("ok", strings.ReplaceAll(rec.Body.String(), "\n", ""))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/v1/posts", nil)
+	matched, pattern := mux.Handler(req)
+	must.Nil(matched)
+	must.Equal("", pattern)
+}
+
+func TestGroupInheritsConfig(t *testing.T) {
+	must := must.New(t)
+	mux := New(WithLogLevel(LogLevelQuiet))
+
+	api := mux.Group("/api")
+	v1 := api.Group("/v1")
+
+	must.Equal(LogLevelQuiet, api.Config().LogLevel)
+	must.Equal(LogLevelQuiet, v1.Config().LogLevel)
+
+	with := v1.With(func(next http.HandlerFunc) http.HandlerFunc {
+		return next
+	})
+	must.Equal(LogLevelQuiet, with.Config().LogLevel)
+
+	must.Equal(true, v1.Config().RemoveTrailingSlash)
+}
+
 func TestServeMuxGroup(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		must := must.New(t)

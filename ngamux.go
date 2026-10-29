@@ -170,7 +170,7 @@ func (mux *Ngamux) All(url string, handler http.HandlerFunc, middlewares ...Midd
 // convenience for applying a short-lived middleware chain to a set of
 // routes.
 func (mux *Ngamux) With(middlewares ...MiddlewareFunc) *Ngamux {
-	group := mux.Group(mux.path)
+	group := mux.Group("")
 	group.Use(middlewares...)
 	return group
 }

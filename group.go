@@ -1,10 +1,12 @@
 package ngamux
 
-// Group returns new nested ngamux object
+// Group returns new nested ngamux object. The new group inherits the
+// parent's configuration.
 func (mux *Ngamux) Group(url string) *Ngamux {
 	group := New()
 	group.path = url
 	group.parent = mux
+	group.config = mux.config
 	return group
 }
 
