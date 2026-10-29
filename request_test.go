@@ -26,16 +26,52 @@ func TestReq(t *testing.T) {
 	must.Equal(expected, result)
 }
 
-func TestParams(t *testing.T) {
+func TestPathValueContextFallback(t *testing.T) {
 	must := must.New(t)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req = req.WithContext(context.WithValue(req.Context(), KeyContextParams, [][]string{{"id", "1"}}))
-	result := Req(req).Params("id")
+	result := Req(req).PathValue("id")
 	must.Equal("1", result)
 
-	result = Req(req).Params("slug")
+	result = Req(req).PathValue("slug")
 	must.Equal("", result)
+
+	must.Equal("1", Req(req).Params("id"))
+}
+
+func TestPathValueFromRouter(t *testing.T) {
+	must := must.New(t)
+
+	mux := New(WithLogLevel(LogLevelQuiet))
+	mux.Get("/users/{id}/posts/{slug}", func(rw http.ResponseWriter, r *http.Request) {
+		request := Req(r)
+		Res(rw).Text(request.PathValue("id") + "|" + request.PathValue("slug") + "|" + request.PathValue("unknown"))
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/users/42/posts/hello", nil)
+	mux.ServeHTTP(rec, req)
+
+	must.Equal("42|hello|", rec.Body.String())
+}
+
+func TestPathValueWithMatchedHandler(t *testing.T) {
+	must := must.New(t)
+
+	mux := New(WithLogLevel(LogLevelQuiet))
+	mux.Get("/users/{id}", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text(Req(r).PathValue("id"))
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/users/7", nil)
+	handler, pattern := mux.Handler(req)
+	must.NotNil(handler)
+	must.Equal("/users/{id}", pattern)
+
+	handler.ServeHTTP(rec, req)
+	must.Equal("7", rec.Body.String())
 }
 
 func TestQuery(t *testing.T) {

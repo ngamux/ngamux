@@ -28,16 +28,38 @@ func Req(r *http.Request) *Request {
 	return &Request{r}
 }
 
-// Params returns parameter from url using a key
-func (r Request) Params(key string) string {
-	params := r.Context().Value(KeyContextParams).([][]string)
+// PathValue returns the value of the path parameter named key.
+//
+// It mirrors [http.Request.PathValue]: the router stores parameters with
+// [http.Request.SetPathValue] while matching the request, so both methods
+// return the same value for requests served by Ngamux. As a fallback, values
+// stored in the request context under [KeyContextParams] are still honored,
+// so code that injects them manually keeps working.
+func (r Request) PathValue(key string) string {
+	if value := r.Request.PathValue(key); value != "" {
+		return value
+	}
+
+	params, ok := r.Context().Value(KeyContextParams).([][]string)
+	if !ok {
+		return ""
+	}
+
 	for _, param := range params {
-		if param[0] == key {
+		if len(param) > 1 && param[0] == key {
 			return param[1]
 		}
 	}
 
 	return ""
+}
+
+// Params returns the value of the path parameter named key.
+//
+// Deprecated: use [Request.PathValue] instead, which matches the naming used
+// by net/http.
+func (r Request) Params(key string) string {
+	return r.PathValue(key)
 }
 
 // Query returns data from query params using a key
