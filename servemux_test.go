@@ -9,6 +9,147 @@ import (
 	"github.com/golang-must/must"
 )
 
+func TestServeMuxRequestState(t *testing.T) {
+	must := must.New(t)
+	mux := NewHttpServeMux()
+	mux.Get("/users/{id}/posts/{slug}", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text(r.Pattern + "|" + r.PathValue("id") + "|" + r.PathValue("slug"))
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/users/42/posts/hello", nil)
+	mux.ServeHTTP(rec, req)
+	must.Equal("GET /users/{id}/posts/{slug}|42|hello", rec.Body.String())
+}
+
+func TestServeMuxAllWildcardState(t *testing.T) {
+	must := must.New(t)
+	mux := NewHttpServeMux()
+	mux.All("/all/{id}", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text(r.Pattern + "|" + r.PathValue("id"))
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPatch, "/all/42", nil)
+	mux.ServeHTTP(rec, req)
+	must.Equal(" /all/{id}|42", rec.Body.String())
+}
+
+func TestServeMuxHeadFallbackState(t *testing.T) {
+	must := must.New(t)
+	mux := NewHttpServeMux()
+	mux.Get("/items/{id}", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text(r.Pattern + "|" + r.PathValue("id"))
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodHead, "/items/7", nil)
+	mux.ServeHTTP(rec, req)
+	must.Equal("GET /items/{id}|7", rec.Body.String())
+}
+
+func TestServeMuxMultiWildcardState(t *testing.T) {
+	must := must.New(t)
+	mux := NewHttpServeMux()
+	mux.Get("/files/{rest...}", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text(r.PathValue("rest"))
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/files/a%2Fb/c", nil)
+	mux.ServeHTTP(rec, req)
+	must.Equal("a/b/c", rec.Body.String())
+}
+
+func TestServeMuxMiddlewareSeesState(t *testing.T) {
+	must := must.New(t)
+	mux := NewHttpServeMux()
+	mux.Use(func(next http.HandlerFunc) http.HandlerFunc {
+		return func(rw http.ResponseWriter, r *http.Request) {
+			Res(rw).Text(r.Pattern + "|" + r.PathValue("id"))
+		}
+	})
+	mux.Get("/middleware/{id}", func(rw http.ResponseWriter, r *http.Request) {})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/middleware/42", nil)
+	mux.ServeHTTP(rec, req)
+	must.Equal("GET /middleware/{id}|42", rec.Body.String())
+}
+
+func TestServeMuxGroupRequestState(t *testing.T) {
+	must := must.New(t)
+	mux := NewHttpServeMux()
+	group := mux.Group("/api")
+	group.Get("/users/{id}", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text(r.Pattern + "|" + r.PathValue("id"))
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/users/42", nil)
+	mux.ServeHTTP(rec, req)
+	must.Equal("GET /api/users/{id}|42", rec.Body.String())
+}
+
+func TestServeMuxRedirects(t *testing.T) {
+	must := must.New(t)
+	mux := NewHttpServeMux()
+	mux.Get("/dir/", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("dir")
+	})
+	mux.Get("/clean/{id}", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("clean")
+	})
+
+	cases := []struct {
+		path     string
+		location string
+	}{
+		{"/dir", "/dir/"},
+		{"/clean//42", "/clean/42"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.path, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+			mux.ServeHTTP(rec, req)
+			must.Equal(http.StatusTemporaryRedirect, rec.Code)
+			must.Equal(tc.location, rec.Header().Get("Location"))
+		})
+	}
+}
+
+func TestServeMuxNotFoundMiddleware(t *testing.T) {
+	must := must.New(t)
+	mux := NewHttpServeMux()
+	calls := 0
+	mux.Use(func(next http.HandlerFunc) http.HandlerFunc {
+		return func(rw http.ResponseWriter, r *http.Request) {
+			calls++
+			if r.URL.Path == "/missing" {
+				rw.Header().Set("X-NotFound-Middleware", "1")
+			}
+			next(rw, r)
+		}
+	})
+	mux.Get("/known", func(rw http.ResponseWriter, r *http.Request) {
+		Res(rw).Text("known")
+	})
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/known", nil)
+	mux.ServeHTTP(rec, req)
+	must.Equal("", rec.Header().Get("X-NotFound-Middleware"))
+	must.Equal(1, calls)
+
+	rec = httptest.NewRecorder()
+	req = httptest.NewRequest(http.MethodGet, "/missing", nil)
+	mux.ServeHTTP(rec, req)
+	must.Equal(http.StatusNotFound, rec.Code)
+	must.Equal("1", rec.Header().Get("X-NotFound-Middleware"))
+	must.Equal(2, calls)
+}
+
 func TestServeMuxUse(t *testing.T) {
 	must := must.New(t)
 	mux := NewHttpServeMux()
@@ -158,5 +299,37 @@ func TestServeMuxAll(t *testing.T) {
 		result := strings.ReplaceAll(rec.Body.String(), "\n", "")
 		expected := "ok"
 		must.Equal(expected, result)
+	}
+}
+
+func BenchmarkHttpServeMuxHotPath(b *testing.B) {
+	noop := func(http.ResponseWriter, *http.Request) {}
+	mux := NewHttpServeMux()
+	mux.Get("/static", noop)
+	mux.Get("/params/{id}/items/{item}", noop)
+	mux.Get("/deep/a/b/c/d/e", noop)
+	mux.Get("/only-get", noop)
+
+	cases := []struct {
+		name   string
+		method string
+		path   string
+	}{
+		{"static", http.MethodGet, "/static"},
+		{"params", http.MethodGet, "/params/123/items/abc"},
+		{"deep", http.MethodGet, "/deep/a/b/c/d/e"},
+		{"miss", http.MethodGet, "/missing"},
+		{"wrong_method", http.MethodPost, "/only-get"},
+	}
+	for _, tc := range cases {
+		b.Run(tc.name, func(b *testing.B) {
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+			w := newDiscardResponseWriter()
+			b.ReportAllocs()
+			b.ResetTimer()
+			for b.Loop() {
+				mux.ServeHTTP(w, req)
+			}
+		})
 	}
 }

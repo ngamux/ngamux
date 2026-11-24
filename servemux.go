@@ -55,12 +55,13 @@ func (h *HttpServeMux) Use(middlewares ...MiddlewareFunc) {
 // route matches, registered middlewares will be applied to the
 // http.NotFound handler.
 func (h HttpServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, pattern := h.mux.Handler(r)
+	handler, pattern := h.mux.Handler(r)
 	if pattern == "" || (pattern == "GET /" && r.URL.Path != "/") {
 		WithMiddlewares(h.middlewares...)(http.NotFound).ServeHTTP(w, r)
 		return
 	}
-	h.mux.ServeHTTP(w, r)
+	r.Pattern = pattern
+	handler.ServeHTTP(w, r)
 }
 
 // HandleFunc registers a handler function for a method and path. If this
@@ -72,7 +73,7 @@ func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerF
 	if h.parent == nil {
 		route := fmt.Sprintf("%s %s", method, path)
 		middlewares = append(h.middlewares, middlewares...)
-		h.mux.HandleFunc(route, WithMiddlewares(middlewares...)(handlerFunc))
+		registerServeMuxHandler(h.mux, route, WithMiddlewares(middlewares...)(handlerFunc))
 		return
 	}
 
@@ -88,7 +89,7 @@ func (h *HttpServeMux) HandleFunc(method, path string, handlerFunc http.HandlerF
 		parent = parent.parent
 	}
 	route := fmt.Sprintf("%s %s", method, gopath.Join(paths...))
-	parent.mux.HandleFunc(route, WithMiddlewares(middlewares...)(handlerFunc))
+	registerServeMuxHandler(parent.mux, route, WithMiddlewares(middlewares...)(handlerFunc))
 }
 
 // Group creates a nested HttpServeMux group with a path prefix. The new
