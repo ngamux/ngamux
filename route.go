@@ -68,6 +68,7 @@ func (p *routeParams) set(r *http.Request) {
 }
 
 var methodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
 	_, _ = io.WriteString(w, "405 method not allowed\n")
 })
 
