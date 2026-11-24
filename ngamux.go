@@ -87,7 +87,7 @@ func (mux Ngamux) Config() Config {
 // via Group), the final path and middleware chain are composed by walking
 // the parent chain and joining path prefixes.
 func (mux *Ngamux) HandleFunc(method, path string, handler http.HandlerFunc, middlewares ...MiddlewareFunc) {
-	middlewares = append(middlewares, mux.middlewares...)
+	middlewares = append(mux.middlewares, middlewares...)
 	if mux.parent == nil {
 		mux.Handle(method+" "+path, WithMiddlewares(middlewares...)(handler))
 		return
