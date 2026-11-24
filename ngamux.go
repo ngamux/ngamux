@@ -12,6 +12,7 @@ import (
 	gopath "path"
 	"slices"
 
+	"github.com/ngamux/ngamux/json"
 	"github.com/ngamux/ngamux/mapping"
 )
 
@@ -56,6 +57,7 @@ func New(opts ...func(*Config)) *Ngamux {
 	for _, opt := range opts {
 		opt(&config)
 	}
+	json.Configure(config.JSONMarshal, config.JSONUnmarshal)
 	return &Ngamux{
 		root:        mapping.New[string, *Node](),
 		middlewares: make([]MiddlewareFunc, 0),
