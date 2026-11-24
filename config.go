@@ -24,3 +24,9 @@ func NewConfig() Config {
 
 	return config
 }
+
+func (c *Config) Copy() *Config {
+	cp := new(Config)
+	*cp = *c
+	return cp
+}
