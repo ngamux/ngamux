@@ -1,7 +1,7 @@
 package ngamux
 
 import (
-	"fmt"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -18,13 +18,58 @@ type (
 	}
 
 	Node struct {
-		key      string
-		path     []byte
+		path     string
 		param    string
 		handler  http.Handler
 		children map[string]*Node
 	}
 )
+
+const maxStackRouteParams = 8
+
+type routeParam struct {
+	name  string
+	value string
+}
+
+type routeParams struct {
+	small [maxStackRouteParams]routeParam
+	count int
+	extra map[string]string
+}
+
+func (p *routeParams) reset() {
+	p.count = 0
+	if p.extra != nil {
+		clear(p.extra)
+	}
+}
+
+func (p *routeParams) add(name, value string) {
+	if p.count < len(p.small) {
+		p.small[p.count] = routeParam{name: name, value: value}
+		p.count++
+		return
+	}
+
+	if p.extra == nil {
+		p.extra = make(map[string]string)
+	}
+	p.extra[name] = value
+}
+
+func (p *routeParams) set(r *http.Request) {
+	for i := 0; i < p.count; i++ {
+		r.SetPathValue(p.small[i].name, p.small[i].value)
+	}
+	for name, value := range p.extra {
+		r.SetPathValue(name, value)
+	}
+}
+
+var methodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	_, _ = io.WriteString(w, "405 method not allowed\n")
+})
 
 func (t *Ngamux) Handle(key string, handler http.Handler) {
 	if strings.HasPrefix(key, "/") {
@@ -47,16 +92,17 @@ func (t *Ngamux) handle(key string, handler http.Handler) {
 	method, key := splitMethodPath(key)
 	current, ok := t.root.Get(method)
 	if !ok {
-		current = &Node{key: "", children: make(map[string]*Node)}
+		current = &Node{children: make(map[string]*Node)}
 		t.root.Set(method, current)
 	}
 
 	keys := strings.Split(key, "/")
-	path := []byte{}
+	var pattern strings.Builder
+	pattern.Grow(len(key))
 	for i, k := range keys {
 		if i > 0 {
-			path = append(path, '/')
-			path = append(path, []byte(k)...)
+			pattern.WriteByte('/')
+			pattern.WriteString(k)
 		}
 		isWildcard := strings.HasPrefix(k, "{") && strings.HasSuffix(k, "}")
 		var param string
@@ -65,80 +111,119 @@ func (t *Ngamux) handle(key string, handler http.Handler) {
 			k = "{}"
 		}
 		if _, ok := current.children[k]; !ok {
-			current.children[k] = &Node{key: k, children: make(map[string]*Node)}
+			current.children[k] = &Node{children: make(map[string]*Node)}
 			current.children[k].param = param
 		}
 		current = current.children[k]
 	}
 	current.handler = handler
-	current.path = path
+	current.path = pattern.String()
 }
 
-func (t Ngamux) match(key string, params map[string]string, handler *http.Handler, pattern *string) {
-	method, key := splitMethodPath(key)
+func (t *Ngamux) matchMethod(method, path string, params *routeParams) (http.Handler, string, bool) {
 	current, ok := t.root.Get(method)
 	if !ok {
-		t.root.Each(func(k string, n *Node) bool {
-			matchNode(n, key, params, handler, pattern)
-			if handler != nil && k != "ALL" {
-				*handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					_, _ = fmt.Fprintf(w, "%d method not allowed\n", http.StatusMethodNotAllowed)
-				})
-				return false
-			}
-			return true
-		})
-		return
+		return nil, "", false
 	}
 
-	matchNode(current, key, params, handler, pattern)
+	node, matched := matchNode(current, path, params)
+	if !matched || node.handler == nil {
+		return nil, "", true
+	}
+	return node.handler, node.path, true
 }
 
-func matchNode(current *Node, key string, params map[string]string, handler *http.Handler, pattern *string) {
-	keys := strings.Split(key, "/")
-	for _, k := range keys {
-		if _, ok := current.children[k]; ok {
-			current = current.children[k]
-		} else if _, ok := current.children["{}"]; ok {
-			current = current.children["{}"]
-			params[current.param] = k
-		} else {
-			return
+func matchNode(current *Node, path string, params *routeParams) (*Node, bool) {
+	for {
+		segment := path
+		separator := strings.IndexByte(path, '/')
+		if separator >= 0 {
+			segment = path[:separator]
+			path = path[separator+1:]
+		}
+
+		next, ok := current.children[segment]
+		if !ok {
+			next, ok = current.children["{}"]
+			if !ok {
+				return nil, false
+			}
+			params.add(next.param, segment)
+		}
+		current = next
+
+		if separator < 0 {
+			return current, true
 		}
 	}
+}
 
-	*handler = current.handler
-	*pattern = string(current.path)
+func (t *Ngamux) matchOtherMethod(method, path string, params *routeParams) (http.Handler, string) {
+	var handler http.Handler
+	var pattern string
+	t.root.Each(func(k string, n *Node) bool {
+		if k == method || k == "ALL" {
+			return true
+		}
+
+		params.reset()
+		node, matched := matchNode(n, path, params)
+		if matched && node.handler != nil {
+			handler = methodNotAllowedHandler
+			pattern = node.path
+			return false
+		}
+		return true
+	})
+	return handler, pattern
 }
 
 func (t Ngamux) Handler(r *http.Request) (http.Handler, string) {
-	params := make(map[string]string)
-	var handler http.Handler
-	var pattern string
-	t.match(r.Method+" "+r.URL.Path, params, &handler, &pattern)
-	if handler == nil {
+	var params routeParams
+	handler, pattern, rootFound := t.matchMethod(r.Method, r.URL.Path, &params)
+	if handler != nil {
+		params.set(r)
+		return handler, pattern
+	}
+	if rootFound {
 		return nil, ""
 	}
 
-	for k, v := range params {
-		r.SetPathValue(k, v)
+	params.reset()
+	if r.Method != "ALL" {
+		handler, pattern, _ = t.matchMethod("ALL", r.URL.Path, &params)
+		if handler != nil {
+			params.set(r)
+			return handler, pattern
+		}
+	}
+
+	handler, pattern = t.matchOtherMethod(r.Method, r.URL.Path, &params)
+	if handler != nil {
+		params.set(r)
 	}
 	return handler, pattern
 }
 
 func (t Ngamux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	handler, _ := t.Handler(r)
-	if handler != nil {
-		handler.ServeHTTP(w, r)
+	var params routeParams
+	handler, _, _ := t.matchMethod(r.Method, r.URL.Path, &params)
+	if handler == nil && r.Method != "ALL" {
+		params.reset()
+		handler, _, _ = t.matchMethod("ALL", r.URL.Path, &params)
+	}
+
+	if handler == nil {
+		if _, ok := t.root.Get("ALL"); !ok {
+			handler, _ = t.matchOtherMethod(r.Method, r.URL.Path, &params)
+		}
+	}
+
+	if handler == nil {
+		http.NotFound(w, r)
 		return
 	}
 
-	r.Method = "ALL"
-	handler, _ = t.Handler(r)
-	if handler != nil {
-		handler.ServeHTTP(w, r)
-		return
-	}
-
-	http.NotFound(w, r)
+	params.set(r)
+	handler.ServeHTTP(w, r)
 }
