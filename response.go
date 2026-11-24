@@ -38,9 +38,13 @@ func (r *Response) Status(status int) *Response {
 
 // Text writes text/plain data with simple string as response body
 func (r *Response) Text(data string) {
-	r.WriteHeader(r.statusSafe())
 	maps.Copy(r.Header(), headerContentTypeText)
-	_, _ = r.Write([]byte(data))
+	r.WriteHeader(r.statusSafe())
+	if sw, ok := r.ResponseWriter.(interface{ WriteString(string) (int, error) }); ok {
+		_, _ = sw.WriteString(data)
+	} else {
+		_, _ = r.Write([]byte(data))
+	}
 }
 
 // JSON write application/json data with json encoded string as response body
