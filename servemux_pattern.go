@@ -105,9 +105,7 @@ func setServeMuxPathValues(r *http.Request, parts []serveMuxPatternPart) {
 			r.SetPathValue(part.name, serveMuxPathUnescape(value))
 			path = rest
 		case serveMuxMultiWildcard:
-			if strings.HasPrefix(path, "/") {
-				path = path[1:]
-			}
+			path = strings.TrimPrefix(path, "/")
 			r.SetPathValue(part.name, serveMuxPathUnescape(path))
 			return
 		default:
