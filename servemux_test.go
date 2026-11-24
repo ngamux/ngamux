@@ -333,3 +333,118 @@ func BenchmarkHttpServeMuxHotPath(b *testing.B) {
 		})
 	}
 }
+
+// BenchmarkHttpServeMuxHotPathBenchmark benchmarks the HttpServeMux hot path.
+func BenchmarkHttpServeMuxHotPathBenchmark(b *testing.B) {
+	mux := NewHttpServeMux()
+	mux.Get("/static", func(w http.ResponseWriter, r *http.Request) {})
+	mux.Get("/params/{id}/items/{item}", func(w http.ResponseWriter, r *http.Request) {})
+	mux.Get("/deep/a/b/c/d/e", func(w http.ResponseWriter, r *http.Request) {})
+	mux.Get("/only-get", func(w http.ResponseWriter, r *http.Request) {})
+
+	cases := []struct {
+		name   string
+		method string
+		path   string
+	}{
+		{"static", http.MethodGet, "/static"},
+		{"params", http.MethodGet, "/params/123/items/abc"},
+		{"deep", http.MethodGet, "/deep/a/b/c/d/e"},
+		{"miss", http.MethodGet, "/missing"},
+		{"wrong_method", http.MethodPost, "/only-get"},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		b.Run(tc.name, func(b *testing.B) {
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+			w := httptest.NewRecorder()
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				mux.ServeHTTP(w, req)
+			}
+		})
+	}
+}
+
+// BenchmarkHttpServeMuxVsStdlibBenchmark compares HttpServeMux against stdlib ServeMux.
+func BenchmarkHttpServeMuxVsStdlibBenchmark(b *testing.B) {
+	hMux := NewHttpServeMux()
+	hMux.Get("/static", func(w http.ResponseWriter, r *http.Request) {})
+	hMux.Get("/params/{id}/items/{item}", func(w http.ResponseWriter, r *http.Request) {})
+	hMux.Get("/deep/a/b/c/d/e", func(w http.ResponseWriter, r *http.Request) {})
+	hMux.Get("/only-get", func(w http.ResponseWriter, r *http.Request) {})
+
+	stdMux := http.NewServeMux()
+	stdMux.HandleFunc("/static", func(w http.ResponseWriter, r *http.Request) {})
+	stdMux.HandleFunc("/params/{id}/items/{item}", func(w http.ResponseWriter, r *http.Request) {})
+	stdMux.HandleFunc("/deep/a/b/c/d/e", func(w http.ResponseWriter, r *http.Request) {})
+	stdMux.HandleFunc("/only-get", func(w http.ResponseWriter, r *http.Request) {})
+
+	cases := []struct {
+		name   string
+		method string
+		path   string
+	}{
+		{"static", http.MethodGet, "/static"},
+		{"params", http.MethodGet, "/params/123/items/abc"},
+		{"deep", http.MethodGet, "/deep/a/b/c/d/e"},
+		{"miss", http.MethodGet, "/missing"},
+		{"wrong_method", http.MethodPost, "/only-get"},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		b.Run(tc.name+"-http", func(b *testing.B) {
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+			w := httptest.NewRecorder()
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				hMux.ServeHTTP(w, req)
+			}
+		})
+
+		b.Run(tc.name+"-stdlib", func(b *testing.B) {
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+			w := httptest.NewRecorder()
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				stdMux.ServeHTTP(w, req)
+			}
+		})
+	}
+}
+
+// BenchmarkHttpServeMuxDeepRoutesBenchmark benchmarks with many segments.
+func BenchmarkHttpServeMuxDeepRoutesBenchmark(b *testing.B) {
+	mux := NewHttpServeMux()
+	for i := 0; i < 1; i++ {
+		mux.Get("/deep/route", func(w http.ResponseWriter, r *http.Request) {})
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/a/b/c/d/e/f/g/h/i/j", nil)
+	w := httptest.NewRecorder()
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		mux.ServeHTTP(w, req)
+	}
+}
+
+// BenchmarkHttpServeMuxAllFallbackBenchmark benchmarks ALL method.
+func BenchmarkHttpServeMuxAllFallbackBenchmark(b *testing.B) {
+	mux := NewHttpServeMux()
+	mux.All("/", func(w http.ResponseWriter, r *http.Request) {})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		mux.ServeHTTP(w, req)
+	}
+}
+
